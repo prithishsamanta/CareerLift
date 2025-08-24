@@ -1,0 +1,250 @@
+/* Analysis Page Styles */
+.analysis-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+}
+
+.header-section {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.page-title {
+  color: white !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.back-button {
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: white !important;
+  transform: translateY(-2px);
+}
+
+.main-content {
+  padding-top: 2rem !important;
+  padding-bottom: 4rem !important;
+}
+
+.analysis-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.analysis-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+.section-title {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700 !important;
+}
+
+.subsection-title {
+  color: #4a5568 !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem !important;
+}
+
+.analysis-description {
+  color: #718096 !important;
+  font-size: 1.1rem !important;
+  line-height: 1.6 !important;
+}
+
+.skill-gap-item {
+  padding: 1rem;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+  transition: all 0.3s ease;
+}
+
+.skill-gap-item:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateX(4px);
+}
+
+.recommendation-item {
+  padding: 0.5rem 0 !important;
+  color: #4a5568 !important;
+  border-left: 3px solid #48bb78;
+  padding-left: 1rem !important;
+  margin-bottom: 0.5rem !important;
+  background: rgba(72, 187, 120, 0.05);
+  border-radius: 0 8px 8px 0;
+}
+
+.sidebar-actions {
+  position: sticky;
+  top: 2rem;
+}
+
+.action-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-title {
+  color: #2d3748 !important;
+  font-weight: 600 !important;
+  text-align: center;
+}
+
+.action-button {
+  padding: 12px 24px !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.edit-button {
+  background: linear-gradient(135deg, #4299e1, #3182ce) !important;
+  box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3) !important;
+}
+
+.edit-button:hover {
+  background: linear-gradient(135deg, #3182ce, #2c5aa0) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(66, 153, 225, 0.4) !important;
+}
+
+.plan-button {
+  background: linear-gradient(135deg, #48bb78, #38a169) !important;
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3) !important;
+}
+
+.plan-button:hover {
+  background: linear-gradient(135deg, #38a169, #2f855a) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4) !important;
+}
+
+.ai-assistant-card {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.ai-title {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600 !important;
+  text-align: center;
+}
+
+.chat-button {
+  color: #667eea !important;
+  border-color: #667eea !important;
+  transition: all 0.3s ease !important;
+}
+
+.chat-button:hover {
+  background: #667eea !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.floating-chat-button {
+  background: linear-gradient(135deg, #ed8936, #dd6b20) !important;
+  box-shadow: 0 8px 25px rgba(237, 137, 54, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.floating-chat-button:hover {
+  background: linear-gradient(135deg, #dd6b20, #c05621) !important;
+  transform: scale(1.1);
+  box-shadow: 0 12px 35px rgba(237, 137, 54, 0.4) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 960px) {
+  .sidebar-actions {
+    position: static;
+    margin-top: 2rem;
+  }
+  
+  .page-title {
+    font-size: 2rem !important;
+  }
+  
+  .floating-chat-button {
+    bottom: 16px;
+    right: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-content {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .page-title {
+    font-size: 1.5rem !important;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .skill-gap-item {
+    padding: 0.75rem;
+  }
+}
+
+/* Animation for skill progress bars */
+@keyframes progressAnimation {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}
+
+.MuiLinearProgress-root {
+  animation: progressAnimation 1.5s ease-out;
+}
+
+/* Chip animations */
+.MuiChip-root {
+  transition: all 0.3s ease !important;
+}
+
+.MuiChip-root:hover {
+  transform: scale(1.05);
+}
+
+/* Card hover effects */
+.action-card:hover,
+.ai-assistant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1) !important;
+}
