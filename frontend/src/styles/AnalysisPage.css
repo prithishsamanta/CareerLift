@@ -167,18 +167,7 @@
   box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
 }
 
-.floating-chat-button {
-  background: #ed8936 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
 
-.floating-chat-button:hover {
-  background: #dd6b20 !important;
-  transform: scale(1.1);
-  box-shadow: 0 8px 25px rgba(237, 137, 54, 0.4) !important;
-}
 
 /* Responsive Design */
 @media (max-width: 960px) {
@@ -191,10 +180,7 @@
     font-size: 2rem !important;
   }
   
-  .floating-chat-button {
-    bottom: 16px;
-    right: 16px;
-  }
+
 }
 
 @media (max-width: 600px) {

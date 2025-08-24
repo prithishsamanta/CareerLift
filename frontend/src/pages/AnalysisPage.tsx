@@ -7,7 +7,6 @@ import {
   Button,
   Card,
   CardContent,
-  Fab,
   Chip,
   LinearProgress,
   Divider
@@ -242,15 +241,7 @@ const AnalysisPage: React.FC = () => {
         </Box>
       </Container>
 
-      {/* Floating Action Button for Chat */}
-      <Fab
-        color="secondary"
-        className="floating-chat-button"
-        onClick={handleChatbot}
-        sx={{ position: 'fixed', bottom: 24, right: 24 }}
-      >
-        <Chat />
-      </Fab>
+
     </Box>
   );
 };
