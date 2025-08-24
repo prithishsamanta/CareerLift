@@ -1,0 +1,231 @@
+/* Analysis Page Styles */
+.analysis-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  position: relative;
+}
+
+.header-section {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.page-title {
+  color: #1a202c !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+}
+
+.back-button {
+  color: #4a5568 !important;
+  border-color: #cbd5e0 !important;
+  background: #ffffff !important;
+  transition: all 0.3s ease !important;
+}
+
+.back-button:hover {
+  background: #f7fafc !important;
+  border-color: #4a5568 !important;
+  transform: translateY(-2px);
+}
+
+.main-content {
+  padding-top: 2rem !important;
+  padding-bottom: 4rem !important;
+}
+
+.analysis-card {
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.analysis-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.section-title {
+  color: #2d3748 !important;
+  font-weight: 700 !important;
+}
+
+.subsection-title {
+  color: #2d3748 !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem !important;
+}
+
+.analysis-description {
+  color: #4a5568 !important;
+  font-size: 1.1rem !important;
+  line-height: 1.6 !important;
+}
+
+.skill-gap-item {
+  padding: 1rem;
+  background: #f7fafc;
+  border-radius: 12px;
+  border-left: 4px solid #3182ce;
+  transition: all 0.3s ease;
+}
+
+.skill-gap-item:hover {
+  background: #edf2f7;
+  transform: translateX(4px);
+}
+
+.recommendation-item {
+  padding: 0.5rem 0 !important;
+  color: #2d3748 !important;
+  border-left: 3px solid #38a169;
+  padding-left: 1rem !important;
+  margin-bottom: 0.5rem !important;
+  background: #f0fff4;
+  border-radius: 0 8px 8px 0;
+}
+
+.sidebar-actions {
+  position: sticky;
+  top: 2rem;
+}
+
+.action-card {
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.action-title {
+  color: #1a202c !important;
+  font-weight: 600 !important;
+  text-align: center;
+}
+
+.action-button {
+  padding: 12px 24px !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.edit-button {
+  background: #3182ce !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(49, 130, 206, 0.2) !important;
+}
+
+.edit-button:hover {
+  background: #2c5aa0 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3) !important;
+}
+
+.plan-button {
+  background: #38a169 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(56, 161, 105, 0.2) !important;
+}
+
+.plan-button:hover {
+  background: #2f855a !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(56, 161, 105, 0.3) !important;
+}
+
+.ai-assistant-card {
+  background: #f0f4f8 !important;
+  border-radius: 16px !important;
+  border: 1px solid #cbd5e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.ai-title {
+  color: #2d3748 !important;
+  font-weight: 600 !important;
+  text-align: center;
+}
+
+.chat-button {
+  color: #3182ce !important;
+  border-color: #3182ce !important;
+  transition: all 0.3s ease !important;
+}
+
+.chat-button:hover {
+  background: #3182ce !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 960px) {
+  .sidebar-actions {
+    position: static;
+    margin-top: 2rem;
+  }
+  
+  .page-title {
+    font-size: 2rem !important;
+  }
+  
+
+}
+
+@media (max-width: 600px) {
+  .main-content {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .page-title {
+    font-size: 1.5rem !important;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .skill-gap-item {
+    padding: 0.75rem;
+  }
+}
+
+/* Animation for skill progress bars */
+@keyframes progressAnimation {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}
+
+.MuiLinearProgress-root {
+  animation: progressAnimation 1.5s ease-out;
+}
+
+/* Chip animations */
+.MuiChip-root {
+  transition: all 0.3s ease !important;
+}
+
+.MuiChip-root:hover {
+  transform: scale(1.05);
+}
+
+/* Card hover effects */
+.action-card:hover,
+.ai-assistant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1) !important;
+}
