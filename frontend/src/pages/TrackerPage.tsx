@@ -343,7 +343,6 @@ const TrackerPage: React.FC = () => {
       <Chatbot
         open={chatbotOpen}
         onClose={() => setChatbotOpen(false)}
-        title="Progress Tracker Assistant"
       />
     </Box>
   );

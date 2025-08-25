@@ -245,7 +245,6 @@ const AnalysisPage: React.FC = () => {
       <Chatbot
         open={chatbotOpen}
         onClose={() => setChatbotOpen(false)}
-        title="Skill Analysis Assistant"
       />
     </Box>
   );
