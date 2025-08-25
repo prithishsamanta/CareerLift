@@ -27,10 +27,12 @@ import {
   NavigateBefore,
   NavigateNext
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import Chatbot, { FloatingChatButton } from '../components/Chatbot';
 import '../styles/TrackerPage.css';
 
 const TrackerPage: React.FC = () => {
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [chatbotOpen, setChatbotOpen] = useState(false);
@@ -59,8 +61,7 @@ const TrackerPage: React.FC = () => {
   };
 
   const handleBackClick = () => {
-    // TODO: Navigate back to analysis page
-    console.log('Back to analysis page');
+    navigate('/analysis');
   };
 
   const handleTaskToggle = (taskId: number) => {
