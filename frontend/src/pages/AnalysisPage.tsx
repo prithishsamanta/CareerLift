@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -22,10 +22,12 @@ import {
   Work
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import Chatbot from '../components/Chatbot';
 import '../styles/AnalysisPage.css';
 
 const AnalysisPage: React.FC = () => {
   const navigate = useNavigate();
+  const [chatbotOpen, setChatbotOpen] = useState(false);
 
   // Mock data for demonstration
   const mockAnalysis = {
@@ -55,8 +57,7 @@ const AnalysisPage: React.FC = () => {
   };
 
   const handleChatbot = () => {
-    // TODO: Open chatbot when implemented
-    console.log('Chatbot clicked');
+    setChatbotOpen(true);
   };
 
   const handleSetPlan = () => {
@@ -240,7 +241,12 @@ const AnalysisPage: React.FC = () => {
         </Box>
       </Container>
 
-
+      {/* Chatbot */}
+      <Chatbot
+        open={chatbotOpen}
+        onClose={() => setChatbotOpen(false)}
+        title="Skill Analysis Assistant"
+      />
     </Box>
   );
 };
