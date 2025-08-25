@@ -21,11 +21,11 @@ import {
   School,
   Work
 } from '@mui/icons-material';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../styles/AnalysisPage.css';
 
 const AnalysisPage: React.FC = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   // Mock data for demonstration
   const mockAnalysis = {
@@ -60,8 +60,7 @@ const AnalysisPage: React.FC = () => {
   };
 
   const handleSetPlan = () => {
-    // TODO: Navigate to plan page when implemented
-    console.log('Set plan clicked');
+    navigate('/tracker');
   };
 
   const getPriorityColor = (priority: string) => {
