@@ -93,17 +93,17 @@
 
 .calendar-day-header {
   background: #f7fafc;
-  padding: 12px 8px;
+  padding: 16px 8px;
   text-align: center;
   font-weight: 600;
   color: #4a5568;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
 }
 
 .calendar-day {
   background: #ffffff;
-  min-height: 100px;
-  padding: 8px;
+  min-height: 120px;
+  padding: 12px;
   position: relative;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -140,12 +140,12 @@
 .task-indicators {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .task-chip {
-  font-size: 0.7rem !important;
-  height: 20px !important;
+  font-size: 0.75rem !important;
+  height: 22px !important;
 }
 
 .more-tasks {

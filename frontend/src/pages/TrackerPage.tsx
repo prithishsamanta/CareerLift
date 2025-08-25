@@ -124,7 +124,7 @@ const TrackerPage: React.FC = () => {
         </Container>
       </Box>
 
-      <Container maxWidth="lg" className="main-content">
+      <Container maxWidth="xl" className="main-content">
         {/* View Mode Toggle */}
         <Box display="flex" justifyContent="center" mb={4}>
           <Box className="view-toggle">
@@ -148,12 +148,12 @@ const TrackerPage: React.FC = () => {
           </Box>
         </Box>
 
-        <Box display="flex" gap={4} flexDirection={{ xs: 'column', lg: 'row' }}>
+        <Box display="flex" gap={3} flexDirection={{ xs: 'column', lg: 'row' }}>
           {/* Main Calendar/List Area */}
-          <Box flex="1" maxWidth={{ lg: '66%' }}>
+          <Box flex="1" maxWidth={{ lg: '80%' }}>
             {viewMode === 'calendar' ? (
               <Card className="calendar-card" elevation={2}>
-                <CardContent sx={{ p: 3 }}>
+                <CardContent sx={{ p: 2 }}>
                   {/* Calendar Header */}
                   <Box display="flex" alignItems="center" justifyContent="between" mb={3}>
                     <IconButton onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}>
@@ -256,7 +256,7 @@ const TrackerPage: React.FC = () => {
           </Box>
 
           {/* Progress Sidebar */}
-          <Box flex="0 0 auto" width={{ xs: '100%', lg: '33%' }}>
+          <Box flex="0 0 auto" width={{ xs: '100%', lg: '20%' }}>
             <Box className="progress-sidebar">
               {/* Weekly Progress */}
               <Card className="progress-card" elevation={2}>
