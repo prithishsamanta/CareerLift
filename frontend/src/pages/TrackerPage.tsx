@@ -27,11 +27,13 @@ import {
   NavigateBefore,
   NavigateNext
 } from '@mui/icons-material';
+import Chatbot, { FloatingChatButton } from '../components/Chatbot';
 import '../styles/TrackerPage.css';
 
 const TrackerPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
+  const [chatbotOpen, setChatbotOpen] = useState(false);
 
   // Mock data for daily tasks based on analysis
   const mockDailyTasks: { [key: string]: Array<{ id: number; task: string; skill: string; completed: boolean; priority: string }> } = {
@@ -333,6 +335,16 @@ const TrackerPage: React.FC = () => {
           </Box>
         </Box>
       </Container>
+
+      {/* Floating Chat Button */}
+      <FloatingChatButton onClick={() => setChatbotOpen(true)} />
+
+      {/* Chatbot */}
+      <Chatbot
+        open={chatbotOpen}
+        onClose={() => setChatbotOpen(false)}
+        title="Progress Tracker Assistant"
+      />
     </Box>
   );
 };
