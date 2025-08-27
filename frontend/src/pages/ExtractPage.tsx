@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import '../styles/ExtractPage.css';
 
 // Main App component containing the entire application flow
-const App = () => {
+const ExtractPage = () => {
     // State to manage the visibility of the panels
     const [resumePanelVisible, setResumePanelVisible] = useState(false);
     const [targetPanelVisible, setTargetPanelVisible] = useState(false);
@@ -15,24 +15,32 @@ const App = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Function to handle the file selection and upload simulation
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            console.log('Selected file:', file.name);
-
             setUploadStatus('');
             setUploadProgress(0);
 
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-                setUploadProgress(progress);
-                if (progress >= 100) {
-                    clearInterval(interval);
+            const formData = new FormData();
+            formData.append('resume', file);
+
+            try {
+                const response = await fetch('http://localhost:3000/api/upload-resume', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    setUploadProgress(100);
                     setUploadStatus('Upload successful!');
-                    console.log('File uploaded:', file.name);
+                    const data = await response.json();
+                    console.log('File uploaded:', data);
+                } else {
+                    setUploadStatus('Upload failed.');
                 }
-            }, 100);
+            } catch (error) {
+                setUploadStatus('Upload failed.');
+            }
         }
     };
 
@@ -188,4 +196,4 @@ const App = () => {
     );
 };
 
-export default App;
+export default ExtractPage;
