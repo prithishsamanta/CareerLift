@@ -26,6 +26,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Chatbot, { FloatingChatButton } from '../components/Chatbot';
+import ResumeForm from '../components/ResumeForm';
 import '../styles/UploadPage.css';
 
 interface UploadedFile {
@@ -58,6 +59,7 @@ const UploadPage: React.FC = () => {
   // Form visibility states
   const [showResumeForm, setShowResumeForm] = useState(false);
   const [showJobForm, setShowJobForm] = useState(false);
+  const [resumeFormOpen, setResumeFormOpen] = useState(false);
 
   // Mock parsed data for demonstration
   const mockResumeData: ParsedContent = {
@@ -147,6 +149,33 @@ const UploadPage: React.FC = () => {
     setShowResumeForm(false);
   };
 
+  const handleResumeFormSave = (resumeData: any) => {
+    // Process the resume data and set it as parsed content
+    setResumeParsed({
+      title: `${resumeData.name}'s Resume`,
+      summary: [
+        `${resumeData.workExperience.length} years of experience`,
+        `Skills: ${resumeData.skills.join(', ')}`,
+        resumeData.education.length > 0 ? `Education: ${resumeData.education[0].degree}` : '',
+        `${resumeData.projects.length} projects completed`
+      ].filter(Boolean),
+      extractedInfo: [
+        `Name: ${resumeData.name}`,
+        `Email: ${resumeData.email}`,
+        `Skills: ${resumeData.skills.join(', ')}`,
+        `Experience: ${resumeData.workExperience.length} positions`
+      ]
+    });
+    
+    // Set a mock file to indicate resume is processed
+    setResumeFile({
+      name: 'resume.pdf',
+      size: '2.5 MB',
+      type: 'application/pdf',
+      uploadedAt: new Date()
+    });
+  };
+
   const formatFileSize = (bytes: number) => {
     return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
   };
@@ -193,7 +222,7 @@ const UploadPage: React.FC = () => {
                     </Typography>
                     <Button
                       variant="contained"
-                      onClick={() => setShowResumeForm(true)}
+                      onClick={() => setResumeFormOpen(true)}
                       startIcon={<CloudUpload />}
                       className="open-form-button"
                       sx={{ mt: 2 }}
@@ -416,6 +445,13 @@ const UploadPage: React.FC = () => {
       <Chatbot
         open={chatbotOpen}
         onClose={() => setChatbotOpen(false)}
+      />
+
+      {/* Resume Form */}
+      <ResumeForm
+        open={resumeFormOpen}
+        onClose={() => setResumeFormOpen(false)}
+        onSave={handleResumeFormSave}
       />
     </Box>
   );
