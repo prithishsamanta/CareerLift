@@ -11,6 +11,10 @@ const ExtractPage = () => {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadStatus, setUploadStatus] = useState('');
 
+     // State for skills and work experience
+    const [skills, setSkills] = useState('');
+    const [workExperience, setWorkExperience] = useState('');
+    
     // useRef hook with a generic type to specify the element type
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -35,6 +39,10 @@ const ExtractPage = () => {
                     setUploadStatus('Upload successful!');
                     const data = await response.json();
                     console.log('File uploaded:', data);
+
+                    // Set skills and work experience from backend response
+                    setSkills(data.skills || '');
+                    setWorkExperience(data.experience || '');
                 } else {
                     setUploadStatus('Upload failed.');
                 }
@@ -160,8 +168,10 @@ const ExtractPage = () => {
                             <input 
                                 type="text" 
                                 id="skills" 
-                                placeholder="Enter skills separated by commas" 
+                                placeholder="Skills" 
                                 className="form-input"
+                                value={skills}
+                                onChange={e => setSkills(e.target.value)}
                             />
                         </div>
                         <div className="form-group">
@@ -169,8 +179,10 @@ const ExtractPage = () => {
                             <textarea 
                                 id="work-experience" 
                                 rows={10} 
-                                placeholder="Enter your work experience" 
+                                placeholder="Work Experience" 
                                 className="form-textarea"
+                                value={workExperience}
+                                onChange={e => setWorkExperience(e.target.value)}
                             ></textarea>
                         </div>
                     </div>
