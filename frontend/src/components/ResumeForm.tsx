@@ -23,7 +23,7 @@ import {
   Add,
   Edit
 } from '@mui/icons-material';
-import './ResumeForm.css';
+import '../styles/ResumeForm.css';
 
 interface ResumeData {
   name: string;
