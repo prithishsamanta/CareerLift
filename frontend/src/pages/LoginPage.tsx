@@ -98,7 +98,7 @@ const LoginPage: React.FC = () => {
           <Box py={3}>
             <Typography variant="h4" className="page-title">
               <LoginIcon sx={{ mr: 2, color: '#3b82f6' }} />
-              Sign In to Resume Tracker
+              Log In to Resume Tracker
             </Typography>
           </Box>
         </Container>
@@ -110,11 +110,9 @@ const LoginPage: React.FC = () => {
           <CardContent sx={{ p: 4 }}>
             {/* Welcome Section */}
             <Box textAlign="center" mb={4}>
-              <Box className="login-icon-container" mb={2}>
-                <Person sx={{ fontSize: 48, color: '#3b82f6' }} />
-              </Box>
               <Typography variant="h5" fontWeight="bold" color="text.primary" mb={1}>
-                Log in
+                Log In
+
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Log in to access your resume tracking dashboard
@@ -189,7 +187,7 @@ const LoginPage: React.FC = () => {
                 className="login-button"
                 sx={{ mb: 3, py: 1.5 }}
               >
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {isLoading ? 'Logging In...' : 'Log In'}
               </Button>
             </Box>
 
@@ -202,7 +200,7 @@ const LoginPage: React.FC = () => {
                 <Button
                   variant="text"
                   size="small"
-                  onClick={() => {/* Add signup navigation later */}}
+                  onClick={() => navigate('/signup')}
                   sx={{ textTransform: 'none' }}
                 >
                   Sign up here

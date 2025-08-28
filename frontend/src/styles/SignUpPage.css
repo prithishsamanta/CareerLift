@@ -1,5 +1,5 @@
-/* Login Page Styles - Consistent with other pages */
-.login-page {
+/* SignUp Page Styles - Consistent with LoginPage */
+.signup-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   position: relative;
@@ -20,8 +20,8 @@
   text-align: center;
 }
 
-/* Login Card */
-.login-card {
+/* SignUp Card */
+.signup-card {
   background: #ffffff !important;
   border-radius: 20px !important;
   border: 1px solid #e2e8f0;
@@ -33,21 +33,21 @@
 
 
 
-/* Login Icon Container */
-.login-icon-container {
+/* SignUp Icon Container */
+.signup-icon-container {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border-radius: 50%;
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
   position: relative;
   overflow: hidden;
 }
 
-.login-icon-container::before {
+.signup-icon-container::before {
   content: '';
   position: absolute;
   top: 0;
@@ -58,96 +58,104 @@
   border-radius: 50%;
 }
 
-/* Demo Credentials Box */
-.demo-credentials {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 12px !important;
-  padding: 16px !important;
-  margin-bottom: 24px;
-  position: relative;
-  overflow: hidden;
-}
-
-.demo-credentials::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-}
-
 /* Form Inputs */
-.login-input .MuiOutlinedInput-root {
+.signup-input .MuiOutlinedInput-root {
   border-radius: 12px !important;
   background: #f8fafc;
   transition: all 0.3s ease;
 }
 
-.login-input .MuiOutlinedInput-root:hover {
+.signup-input .MuiOutlinedInput-root:hover {
   background: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.login-input .MuiOutlinedInput-root.Mui-focused {
+.signup-input .MuiOutlinedInput-root.Mui-focused {
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.login-input .MuiOutlinedInput-notchedOutline {
+.signup-input .MuiOutlinedInput-notchedOutline {
   border-color: #e2e8f0 !important;
   transition: all 0.3s ease;
 }
 
-.login-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+.signup-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
   border-color: #cbd5e1 !important;
 }
 
-.login-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+.signup-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
   border-color: #3b82f6 !important;
   border-width: 2px !important;
 }
 
-.login-input .MuiInputLabel-root {
+.signup-input .MuiInputLabel-root {
   color: #6b7280 !important;
   font-weight: 500;
 }
 
-.login-input .MuiInputLabel-root.Mui-focused {
+.signup-input .MuiInputLabel-root.Mui-focused {
   color: #3b82f6 !important;
 }
 
-/* Login Button */
-.login-button {
-  background: #3b82f6 !important;
+/* Error states */
+.signup-input .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline {
+  border-color: #ef4444 !important;
+}
+
+.signup-input .MuiInputLabel-root.Mui-error {
+  color: #ef4444 !important;
+}
+
+.signup-input .MuiFormHelperText-root.Mui-error {
+  color: #ef4444 !important;
+  font-weight: 500;
+}
+
+/* SignUp Button */
+.signup-button {
+  background: #10b981 !important;
   border-radius: 12px !important;
   font-weight: 600 !important;
   text-transform: none !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
   transition: all 0.3s ease !important;
 }
 
-.login-button:hover {
-  background: #2563eb !important;
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3) !important;
+.signup-button:hover {
+  background: #059669 !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3) !important;
 }
 
-.login-button:disabled {
+.signup-button:disabled {
   background: #94a3b8 !important;
   color: #ffffff !important;
   box-shadow: none !important;
   transform: none;
 }
 
+/* Grid spacing adjustments */
+.MuiGrid-container {
+  margin-top: 0 !important;
+}
+
+.MuiGrid-item {
+  padding-top: 0 !important;
+}
+
 /* Responsive Design */
+@media (max-width: 900px) {
+  .signup-card {
+    margin: 20px 12px !important;
+  }
+}
+
 @media (max-width: 600px) {
-  .login-page {
+  .signup-page {
     padding: 0 12px;
   }
   
-  .login-card {
+  .signup-card {
     margin: 16px 8px !important;
     border-radius: 16px !important;
   }
@@ -157,12 +165,12 @@
     padding: 0 16px;
   }
   
-  .login-page .MuiContainer-root {
+  .signup-page .MuiContainer-root {
     padding-left: 8px !important;
     padding-right: 8px !important;
   }
   
-  .login-card .MuiCardContent-root {
+  .signup-card .MuiCardContent-root {
     padding: 24px !important;
   }
 }
@@ -179,27 +187,22 @@
   }
 }
 
-.login-card {
+.signup-card {
   animation: slideInUp 0.6s ease-out;
 }
 
 /* Focus states for accessibility */
-.login-button:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-.demo-credentials button:focus {
-  outline: 2px solid #3b82f6;
+.signup-button:focus {
+  outline: 2px solid #10b981;
   outline-offset: 2px;
 }
 
 /* Loading state */
-.login-button:disabled {
+.signup-button:disabled {
   position: relative;
 }
 
-.login-button:disabled::after {
+.signup-button:disabled::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -216,4 +219,16 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Form validation styling */
+.MuiFormHelperText-root {
+  margin-left: 0 !important;
+  margin-top: 4px !important;
+  font-size: 0.75rem !important;
+}
+
+/* Success message styling */
+.MuiAlert-standardSuccess {
+  border-radius: 12px !important;
 }
