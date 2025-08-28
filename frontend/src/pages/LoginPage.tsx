@@ -114,10 +114,10 @@ const LoginPage: React.FC = () => {
                 <Person sx={{ fontSize: 48, color: '#3b82f6' }} />
               </Box>
               <Typography variant="h5" fontWeight="bold" color="text.primary" mb={1}>
-                Sign In
+                Log in
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Sign in to access your resume tracking dashboard
+                Log in to access your resume tracking dashboard
               </Typography>
             </Box>
 
