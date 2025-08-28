@@ -112,6 +112,7 @@ const LoginPage: React.FC = () => {
             <Box textAlign="center" mb={4}>
               <Typography variant="h5" fontWeight="bold" color="text.primary" mb={1}>
                 Log In
+
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Log in to access your resume tracking dashboard
