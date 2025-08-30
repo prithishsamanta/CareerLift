@@ -47,13 +47,11 @@ const AnalysisPage: React.FC = () => {
   };
 
   const handleBackClick = () => {
-    // TODO: Navigate to previous page when implemented
-    console.log('Back button clicked');
+    navigate('/upload');
   };
 
   const handleEditForm = () => {
-    // TODO: Navigate to edit form when implemented
-    console.log('Edit form clicked');
+    navigate('/upload');
   };
 
   const handleChatbot = () => {

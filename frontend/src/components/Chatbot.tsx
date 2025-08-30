@@ -12,8 +12,7 @@ import {
   Fab,
   Slide,
   InputAdornment,
-  Divider,
-  Button
+  Divider
 } from '@mui/material';
 import {
   Close,
@@ -25,7 +24,7 @@ import {
   Refresh
 } from '@mui/icons-material';
 import { TransitionProps } from '@mui/material/transitions';
-import './Chatbot.css';
+import '../styles/Chatbot.css';
 
 interface Message {
   id: number;
