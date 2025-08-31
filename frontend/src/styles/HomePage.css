@@ -1,0 +1,399 @@
+/* Home Page Styles - Workspace Management */
+.home-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  position: relative;
+}
+
+/* Task Bar */
+.task-bar {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.task-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+}
+
+.task-left {
+  display: flex;
+  align-items: center;
+}
+
+.page-title {
+  color: #1a202c !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+}
+
+.task-center {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.task-button {
+  color: #4a5568 !important;
+  border-color: #cbd5e0 !important;
+  background: #ffffff !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.task-button:hover:not(:disabled) {
+  background: #f7fafc !important;
+  border-color: #4a5568 !important;
+  transform: translateY(-1px);
+}
+
+.task-button:disabled {
+  color: #a0aec0 !important;
+  border-color: #e2e8f0 !important;
+  cursor: not-allowed;
+}
+
+.task-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.task-icon-button {
+  color: #4a5568 !important;
+  transition: all 0.3s ease !important;
+}
+
+.task-icon-button:hover:not(:disabled) {
+  color: #3182ce !important;
+  transform: scale(1.1);
+}
+
+.task-icon-button:disabled {
+  color: #a0aec0 !important;
+  cursor: not-allowed;
+}
+
+/* Main Content */
+.main-content {
+  padding-top: 2rem !important;
+  padding-bottom: 4rem !important;
+}
+
+.workspaces-container {
+  margin-top: 1rem;
+}
+
+.workspaces-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: flex-start;
+}
+
+.workspace-grid-item {
+  flex: 0 0 calc(100% - 24px);
+  min-width: 280px;
+}
+
+@media (min-width: 600px) {
+  .workspace-grid-item {
+    flex: 0 0 calc(50% - 12px);
+  }
+}
+
+@media (min-width: 960px) {
+  .workspace-grid-item {
+    flex: 0 0 calc(33.333% - 16px);
+  }
+}
+
+@media (min-width: 1280px) {
+  .workspace-grid-item {
+    flex: 0 0 calc(25% - 18px);
+  }
+}
+
+/* Workspace Cards */
+.workspace-card {
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer;
+  height: 100%;
+  overflow: hidden;
+}
+
+.workspace-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+  border-color: #3182ce;
+}
+
+.workspace-content {
+  padding: 1.5rem !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.workspace-icon {
+  color: #3182ce !important;
+  font-size: 1.5rem !important;
+  margin-right: 0.75rem !important;
+}
+
+.workspace-name {
+  color: #2d3748 !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  margin: 0 !important;
+}
+
+.workspace-description {
+  color: #4a5568 !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  margin-bottom: 1rem !important;
+  flex-grow: 1;
+}
+
+.workspace-meta {
+  margin-top: auto;
+}
+
+.workspace-chip {
+  background: #f7fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #4a5568 !important;
+  font-size: 0.75rem !important;
+}
+
+/* Create Workspace Card */
+.create-workspace-card {
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  border: 2px dashed #cbd5e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer;
+  height: 100%;
+  overflow: hidden;
+}
+
+.create-workspace-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+  border-color: #3182ce;
+  background: #f7fafc !important;
+}
+
+.create-workspace-content {
+  padding: 2rem !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.create-workspace-icon {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.create-workspace-text {
+  color: #2d3748 !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Create Workspace Dialog */
+.create-workspace-dialog .MuiDialog-paper {
+  border-radius: 16px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dialog-title {
+  color: #1a202c !important;
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+  display: flex;
+  align-items: center;
+  padding: 1.5rem 1.5rem 0.5rem 1.5rem !important;
+}
+
+.dialog-actions {
+  padding: 1rem 1.5rem 1.5rem 1.5rem !important;
+  gap: 12px;
+}
+
+.cancel-button {
+  color: #4a5568 !important;
+  border-color: #cbd5e0 !important;
+  background: #ffffff !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.cancel-button:hover {
+  background: #f7fafc !important;
+  border-color: #4a5568 !important;
+}
+
+.create-button {
+  background: #3182ce !important;
+  color: #ffffff !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(49, 130, 206, 0.2) !important;
+}
+
+.create-button:hover:not(:disabled) {
+  background: #2c5aa0 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3) !important;
+}
+
+.create-button:disabled {
+  background: #a0aec0 !important;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive Design */
+@media (max-width: 960px) {
+  .task-toolbar {
+    padding: 0 16px;
+  }
+
+  .task-center {
+    gap: 8px;
+  }
+
+  .task-button {
+    padding: 6px 12px !important;
+    font-size: 0.875rem !important;
+  }
+
+  .page-title {
+    font-size: 1.125rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .task-toolbar {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .task-center {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .task-right {
+    order: 2;
+  }
+
+  .task-left {
+    order: 1;
+  }
+
+  .workspace-content,
+  .create-workspace-content {
+    padding: 1rem !important;
+  }
+
+  .workspace-name,
+  .create-workspace-text {
+    font-size: 1.125rem !important;
+  }
+
+  .dialog-title {
+    font-size: 1.25rem !important;
+    padding: 1rem 1rem 0.5rem 1rem !important;
+  }
+
+  .dialog-actions {
+    padding: 0.75rem 1rem 1rem 1rem !important;
+    flex-direction: column;
+  }
+
+  .cancel-button,
+  .create-button {
+    width: 100%;
+  }
+}
+
+/* Animation for cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.workspace-card,
+.create-workspace-card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.workspace-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.workspace-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.workspace-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+/* Hover effects for interactive elements */
+.workspace-card:hover .workspace-icon {
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+.create-workspace-card:hover .create-workspace-icon {
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
