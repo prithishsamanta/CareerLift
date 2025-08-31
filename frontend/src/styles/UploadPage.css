@@ -1,0 +1,385 @@
+/* Upload Page Styles - Consistent with Analysis and Tracker Pages */
+.upload-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  position: relative;
+}
+
+.header-section {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.page-title {
+  color: #1a202c !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+.page-subtitle {
+  color: #4a5568 !important;
+  font-weight: 400 !important;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.main-content {
+  padding-top: 3rem !important;
+  padding-bottom: 4rem !important;
+}
+
+/* Upload Cards */
+.upload-card {
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  height: fit-content;
+}
+
+.upload-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.section-title {
+  color: #2d3748 !important;
+  font-weight: 600 !important;
+}
+
+/* Empty State */
+.empty-state {
+  margin-top: 2rem;
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #f7fafc;
+  border-radius: 12px;
+  border: 2px dashed #cbd5e0;
+}
+
+.empty-message {
+  font-size: 1.1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.open-form-button {
+  background: #3182ce !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+}
+
+.open-form-button:hover {
+  background: #2c5aa0 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
+}
+
+/* Upload Area */
+.upload-area {
+  margin-top: 1rem;
+}
+
+.upload-dropzone {
+  border: 2px dashed #cbd5e0;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  background: #f7fafc;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.upload-dropzone:hover {
+  border-color: #3182ce;
+  background: #ebf8ff;
+  transform: translateY(-2px);
+}
+
+.upload-button {
+  background: #3182ce !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  padding: 10px 24px !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+}
+
+.upload-button:hover {
+  background: #2c5aa0 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
+}
+
+/* Uploaded File */
+.uploaded-file {
+  margin-top: 1rem;
+}
+
+.file-info {
+  padding: 16px !important;
+  background: #f0fff4 !important;
+  border: 1px solid #9ae6b4 !important;
+  border-radius: 8px !important;
+}
+
+.file-action {
+  color: #4a5568 !important;
+  transition: all 0.2s ease !important;
+}
+
+.file-action:hover {
+  background: rgba(74, 85, 104, 0.1) !important;
+  color: #2d3748 !important;
+}
+
+.file-action.delete:hover {
+  background: rgba(245, 101, 101, 0.1) !important;
+  color: #e53e3e !important;
+}
+
+/* Job Description Input */
+.job-input-area {
+  margin-top: 1rem;
+}
+
+.job-description-input .MuiOutlinedInput-root {
+  background: #f7fafc !important;
+  border-radius: 8px !important;
+}
+
+.job-description-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #3182ce !important;
+}
+
+.job-description-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #3182ce !important;
+  border-width: 2px !important;
+}
+
+.job-description-input .MuiInputBase-input::placeholder {
+  color: #a0aec0 !important;
+  opacity: 1;
+}
+
+.process-button {
+  background: #ed8936 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  padding: 10px 24px !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+}
+
+.process-button:hover {
+  background: #dd6b20 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
+}
+
+.process-button:disabled {
+  background: #cbd5e0 !important;
+  color: #a0aec0 !important;
+  transform: none;
+  box-shadow: none;
+}
+
+.cancel-button {
+  color: #4a5568 !important;
+  border-color: #cbd5e0 !important;
+  background: #ffffff !important;
+  font-weight: 600 !important;
+  padding: 10px 24px !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+}
+
+.cancel-button:hover {
+  background: #f7fafc !important;
+  border-color: #4a5568 !important;
+  transform: translateY(-1px);
+}
+
+/* Parsed Content */
+.parsed-content {
+  animation: slideIn 0.5s ease-out;
+}
+
+.parsed-title {
+  color: #2d3748 !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+}
+
+.summary-box {
+  background: #f7fafc;
+  border-radius: 8px;
+  padding: 16px;
+  border-left: 4px solid #3182ce;
+}
+
+.summary-item {
+  color: #4a5568 !important;
+  margin-bottom: 8px !important;
+  line-height: 1.5 !important;
+}
+
+.summary-item:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Analyze Button */
+.analyze-button {
+  background: linear-gradient(135deg, #38a169, #2f855a) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  text-transform: none !important;
+  box-shadow: 0 4px 20px rgba(56, 161, 105, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.analyze-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2f855a, #276749) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(56, 161, 105, 0.4) !important;
+}
+
+.analyze-button:disabled {
+  background: #cbd5e0 !important;
+  color: #a0aec0 !important;
+  box-shadow: none !important;
+  transform: none;
+}
+
+/* Ready Alert */
+.ready-alert {
+  border-radius: 12px !important;
+  background: #f0fff4 !important;
+  border: 1px solid #9ae6b4 !important;
+  max-width: 600px;
+}
+
+.ready-alert .MuiAlert-icon {
+  color: #38a169 !important;
+}
+
+/* Progress Bar */
+.MuiLinearProgress-root {
+  background-color: #e2e8f0 !important;
+  border-radius: 4px !important;
+  height: 6px !important;
+}
+
+.MuiLinearProgress-bar {
+  background-color: #3182ce !important;
+  border-radius: 4px !important;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.upload-dropzone:hover .MuiSvgIcon-root {
+  animation: pulse 2s infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 960px) {
+  .main-content {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 2rem !important;
+  }
+  
+  .upload-dropzone {
+    padding: 2rem 1rem;
+  }
+  
+  .page-title {
+    font-size: 2rem !important;
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .analyze-button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header-section {
+    padding: 1rem 0;
+  }
+  
+  .page-title {
+    font-size: 1.8rem !important;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem !important;
+    padding: 0 1rem;
+  }
+  
+  .upload-dropzone {
+    padding: 1.5rem 0.5rem;
+  }
+  
+  .upload-dropzone .MuiSvgIcon-root {
+    font-size: 3rem !important;
+  }
+  
+  .section-title {
+    font-size: 1.3rem !important;
+  }
+  
+  .job-description-input .MuiInputBase-root {
+    font-size: 0.9rem;
+  }
+}
+
+/* Focus states for accessibility */
+.upload-dropzone:focus-within {
+  outline: 2px solid #3182ce;
+  outline-offset: 2px;
+}
+
+.job-description-input .MuiOutlinedInput-root.Mui-focused {
+  box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
+}
+
+/* Drag and drop states */
+.upload-dropzone.drag-over {
+  border-color: #38a169;
+  background: #f0fff4;
+}
+
+.upload-dropzone.drag-over .MuiSvgIcon-root {
+  color: #38a169 !important;
+}
