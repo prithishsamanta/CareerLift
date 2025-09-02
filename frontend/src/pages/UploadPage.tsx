@@ -10,7 +10,7 @@ import {
   Divider,
   Alert,
   LinearProgress,
-  Chip,
+
   IconButton,
   TextField
 } from '@mui/material';
@@ -27,6 +27,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Chatbot, { FloatingChatButton } from '../components/Chatbot';
 import ResumeForm from '../components/ResumeForm';
+import Taskbar from '../components/Taskbar';
 import '../styles/UploadPage.css';
 
 interface UploadedFile {
@@ -176,29 +177,20 @@ const UploadPage: React.FC = () => {
     });
   };
 
-  const formatFileSize = (bytes: number) => {
-    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-  };
+
 
   const canAnalyze = resumeParsed && jobDescParsed;
 
   return (
     <Box className="upload-page">
-      {/* Header */}
-      <Box className="header-section">
-        <Container maxWidth="lg">
-          <Box display="flex" alignItems="center" justifyContent="center" py={4}>
-            <Typography variant="h3" className="page-title">
-              <Analytics sx={{ mr: 2, fontSize: 'inherit' }} />
-              Skill Gap Analyzer
-            </Typography>
-          </Box>
-          <Box textAlign="center" pb={2}>
-            <Typography variant="h6" className="page-subtitle">
-              Upload your resume and job description to get personalized skill gap analysis
-            </Typography>
-          </Box>
-        </Container>
+      {/* Taskbar */}
+      <Taskbar />
+
+      {/* Centered Description */}
+      <Box sx={{ textAlign: 'center', py: 10, px: 3, mt: 4 }}>
+        <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '600px', mx: 'auto', lineHeight: 1.8, fontSize: '1.1rem' }}>
+          Upload your resume and job description to get personalized skill gap analysis
+        </Typography>
       </Box>
 
       <Container maxWidth="xl" className="main-content">

@@ -6,28 +6,19 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
-  AppBar,
-  Toolbar,
   Chip,
 } from "@mui/material";
 import {
   Add,
   Work,
-  Search,
-  FilterList,
-  Sort,
-  Settings,
-  Notifications,
-  AccountCircle,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import Taskbar from "../components/Taskbar";
 import "../styles/HomePage.css";
 
 interface Workspace {
@@ -78,56 +69,15 @@ const HomePage: React.FC = () => {
 
   return (
     <Box className="home-page">
-      {/* Task Bar */}
-      <AppBar position="static" className="task-bar" elevation={1}>
-        <Toolbar className="task-toolbar">
-          <Box className="task-left">
-            <Typography variant="h6" className="page-title">
-              <Work sx={{ mr: 1 }} />
-              My Workspaces
-            </Typography>
-          </Box>
+      {/* Taskbar */}
+      <Taskbar />
 
-          <Box className="task-center">
-            <Button
-              variant="outlined"
-              startIcon={<Search />}
-              className="task-button"
-              disabled
-            >
-              Search Workspaces
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<FilterList />}
-              className="task-button"
-              disabled
-            >
-              Filter
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<Sort />}
-              className="task-button"
-              disabled
-            >
-              Sort
-            </Button>
-          </Box>
-
-          <Box className="task-right">
-            <IconButton className="task-icon-button" disabled>
-              <Notifications />
-            </IconButton>
-            <IconButton className="task-icon-button" disabled>
-              <Settings />
-            </IconButton>
-            <IconButton className="task-icon-button" disabled>
-              <AccountCircle />
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      {/* Centered Description - Updated */}
+      <Box className="paragraph-container" sx={{ textAlign: 'center', pt: 10, pb: 4, px: 3, mt: 4 }}>
+        <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '600px', mx: 'auto', lineHeight: 1.8, fontSize: '1.1rem' }}>
+          Manage your skill development workspaces and track your progress
+        </Typography>
+      </Box>
 
       {/* Main Content */}
       <Container maxWidth="lg" className="main-content">

@@ -17,12 +17,13 @@ import {
   Chat,
   Schedule,
   TrendingUp,
-  Psychology,
+
   School,
   Work
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Chatbot from '../components/Chatbot';
+import Taskbar from '../components/Taskbar';
 import '../styles/AnalysisPage.css';
 
 const AnalysisPage: React.FC = () => {
@@ -73,24 +74,19 @@ const AnalysisPage: React.FC = () => {
 
   return (
     <Box className="analysis-page">
-      {/* Header */}
-      <Box className="header-section">
-        <Container maxWidth="lg">
-          <Box display="flex" alignItems="center" justifyContent="space-between" py={3}>
-            <Typography variant="h3" className="page-title">
-              <Psychology sx={{ mr: 2, fontSize: 'inherit' }} />
-              Skill Gap Analysis
-            </Typography>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBack />}
-              onClick={handleBackClick}
-              className="back-button"
-            >
-              Back
-            </Button>
-          </Box>
-        </Container>
+      {/* Taskbar */}
+      <Taskbar />
+
+      {/* Navigation */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 3, mt: 4 }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBack />}
+          onClick={handleBackClick}
+          className="back-button"
+        >
+          Back to Upload
+        </Button>
       </Box>
 
       <Container maxWidth="lg" className="main-content">

@@ -1,0 +1,79 @@
+/* Taskbar Component Styles */
+.taskbar {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+.taskbar-toolbar {
+  padding: 0 24px !important;
+  min-height: 64px !important;
+}
+
+.app-name {
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  color: #1a202c !important;
+  letter-spacing: 0.5px;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-button {
+  color: #4a5568 !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid transparent !important;
+}
+
+.nav-button:hover {
+  background-color: #f7fafc !important;
+  color: #3182ce !important;
+  border-color: #3182ce !important;
+  transform: translateY(-1px);
+}
+
+.nav-button .MuiSvgIcon-root {
+  font-size: 1.1rem !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .taskbar-toolbar {
+    padding: 0 16px !important;
+  }
+  
+  .app-name {
+    font-size: 1.1rem !important;
+  }
+  
+  .nav-button {
+    padding: 6px 12px !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .nav-button .MuiButton-startIcon {
+    margin-right: 4px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-buttons {
+    gap: 4px;
+  }
+  
+  .nav-button {
+    min-width: auto !important;
+    padding: 6px 8px !important;
+  }
+  
+  .nav-button .MuiButton-startIcon {
+    margin-right: 2px !important;
+    margin-left: 0 !important;
+  }
+}

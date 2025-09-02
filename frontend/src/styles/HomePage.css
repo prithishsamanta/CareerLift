@@ -405,3 +405,7 @@
 html {
   scroll-behavior: smooth;
 }
+
+.paragraph-container{
+  /* Spacing controlled by sx props in component */
+}

@@ -17,7 +17,6 @@ import {
   Lock,
   Visibility,
   VisibilityOff,
-  PersonAdd,
   Person
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -124,20 +123,8 @@ const SignUpPage: React.FC = () => {
 
   return (
     <div className="signup-page">
-      {/* Header */}
-      <Box className="header-section">
-        <Container maxWidth="lg">
-          <Box py={3}>
-            <Typography variant="h4" className="page-title">
-              <PersonAdd sx={{ mr: 2, color: '#3b82f6' }} />
-              Create Your Account
-            </Typography>
-          </Box>
-        </Container>
-      </Box>
-
       {/* Main Content */}
-      <Container maxWidth="sm" sx={{ py: 6 }}>
+      <Container maxWidth="sm" sx={{ py: 8 }}>
         <Card className="signup-card" elevation={8}>
           <CardContent sx={{ p: 4 }}>
             {/* Welcome Section */}

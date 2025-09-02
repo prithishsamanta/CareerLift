@@ -10,16 +10,14 @@ import {
   Alert,
   InputAdornment,
   IconButton,
-  Divider,
-  Paper
+  Divider
 } from '@mui/material';
 import {
   Email,
   Lock,
   Visibility,
   VisibilityOff,
-  Login as LoginIcon,
-  Person
+
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import '../styles/LoginPage.css';
@@ -83,29 +81,12 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const fillDefaultCredentials = () => {
-    setFormData({
-      email: DEFAULT_EMAIL,
-      password: DEFAULT_PASSWORD
-    });
-  };
+
 
   return (
     <div className="login-page">
-      {/* Header */}
-      <Box className="header-section">
-        <Container maxWidth="lg">
-          <Box py={3}>
-            <Typography variant="h4" className="page-title">
-              <LoginIcon sx={{ mr: 2, color: '#3b82f6' }} />
-              Log In to Resume Tracker
-            </Typography>
-          </Box>
-        </Container>
-      </Box>
-
       {/* Main Content */}
-      <Container maxWidth="sm" sx={{ py: 6 }}>
+      <Container maxWidth="sm" sx={{ py: 8 }}>
         <Card className="login-card" elevation={8}>
           <CardContent sx={{ p: 4 }}>
             {/* Welcome Section */}
