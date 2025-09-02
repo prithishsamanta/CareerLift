@@ -188,42 +188,50 @@
 .create-workspace-card {
   background: #ffffff !important;
   border-radius: 16px !important;
-  border: 2px dashed #cbd5e0;
+  border: 2px solid #e2e8f0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
   transition: all 0.3s ease !important;
   cursor: pointer;
-  height: 100%;
+  height: 280px;
+  width: 280px;
   overflow: hidden;
+  margin: 16px auto;
 }
 
 .create-workspace-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-  border-color: #3182ce;
-  background: #f7fafc !important;
+  border-color: #3b82f6;
 }
 
 .create-workspace-content {
-  padding: 2rem !important;
+  padding: 16px 24px 32px 24px !important;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+  gap: 16px;
 }
 
 .create-workspace-icon {
-  margin-bottom: 1rem;
   display: flex;
   justify-content: center;
+  align-items: center;
+  width: 64px;
+  height: 64px;
+  background: #f8fafc;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
 }
 
 .create-workspace-text {
-  color: #2d3748 !important;
-  font-weight: 700 !important;
-  font-size: 1.25rem !important;
-  margin-bottom: 0.5rem !important;
+  color: #1a202c !important;
+  font-weight: 600 !important;
+  font-size: 1.125rem !important;
+  margin: 0 !important;
 }
 
 /* Create Workspace Dialog */

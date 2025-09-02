@@ -179,12 +179,12 @@ const HomePage: React.FC = () => {
               >
                 <CardContent className="create-workspace-content">
                   <Box className="create-workspace-icon">
-                    <Add sx={{ fontSize: 48, color: "primary.main" }} />
+                    <Add sx={{ fontSize: 32, color: "#3b82f6" }} />
                   </Box>
                   <Typography variant="h6" className="create-workspace-text">
                     Create New Workspace
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', lineHeight: 1.4 }}>
                     Start a new skill development journey
                   </Typography>
                 </CardContent>
