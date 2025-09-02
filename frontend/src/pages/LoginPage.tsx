@@ -66,8 +66,8 @@ const LoginPage: React.FC = () => {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('userEmail', formData.email);
         
-        // Navigate to dashboard/upload page
-        navigate('/upload');
+        // Navigate to home page
+        navigate('/home');
       }, 1000);
     } else {
       setTimeout(() => {
