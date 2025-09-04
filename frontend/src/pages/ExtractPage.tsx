@@ -29,7 +29,7 @@ const ExtractPage = () => {
             formData.append('resume', file);
 
             try {
-                const response = await fetch('http://localhost:3000/api/upload-resume', {
+                const response = await fetch('http://localhost:5000/api/upload-resume', {
                     method: 'POST',
                     body: formData,
                 });

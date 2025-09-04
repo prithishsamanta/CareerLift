@@ -12,7 +12,8 @@ import {
   LinearProgress,
   Chip,
   IconButton,
-  TextField
+  TextField,
+  Modal
 } from '@mui/material';
 import {
   CloudUpload,
@@ -94,11 +95,15 @@ const UploadPage: React.FC = () => {
     ]
   };
 
-  const handleResumeUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    console.log("In handleResumeUpload handle.")
     if (file) {
       setIsUploading(true);
       setUploadProgress(0);
+
+      const formData = new FormData();
+      formData.append('resume', file);
       
       // Simulate upload progress
       const interval = setInterval(() => {
@@ -124,6 +129,43 @@ const UploadPage: React.FC = () => {
           return prev + 10;
         });
       }, 200);
+
+      try {
+            const response = await fetch('http://localhost:5000/api/upload-resume', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                setUploadProgress(100);
+                setIsUploading(false);
+
+                setResumeFile({
+                name: file.name,
+                size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+                type: file.type,
+                uploadedAt: new Date()
+              });
+
+                const data = await response.json();
+                console.log('File uploaded:', data);
+
+                setResumeParsed(mockResumeData);
+                setShowResumeForm(false);
+                // Set skills and work experience from backend response
+                // setSkills(data.skills || '');
+                // setWorkExperience(data.experience || '');
+            } else {
+                // setUploadStatus('Upload failed.');
+                setIsUploading(false);
+                setUploadProgress(0);
+                console.log("Upload failed.")
+            }
+          } catch (error) {
+              setIsUploading(false);
+              setUploadProgress(0);
+              console.log("Upload failed in catch")
+        }
     }
   };
 
@@ -222,14 +264,22 @@ const UploadPage: React.FC = () => {
                     </Typography>
                     <Button
                       variant="contained"
-                      onClick={() => setResumeFormOpen(true)}
+                      onClick={() => setShowResumeForm(true)}
                       startIcon={<CloudUpload />}
                       className="open-form-button"
                       sx={{ mt: 2 }}
                     >
                       Upload Resume
                     </Button>
-                  </Box>
+                    {/* <Modal open={resumeFormOpen} onClose={() => setShowResumeForm(true)}>
+                      <Box className="modal-upload-area" sx={{
+                        position: 'absolute', top: '50%', left: '50%',
+                        transform: 'translate(-50%, -50%)', bgcolor: 'background.paper',
+                        boxShadow: 24, p: 4, borderRadius: 2, minWidth: 350
+                      }}>
+                        </Box>
+                      </Modal> */}
+                    </Box>
                 ) : showResumeForm && !resumeFile ? (
                   <Box className="upload-area">
                     <input
