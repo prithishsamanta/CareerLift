@@ -18,8 +18,7 @@ def extract_name_with_nlp(text):
     # Iterate through the named entities
     for ent in doc.ents:
         # If the entity is a person, return it
-        if ent.label_ == "PERSON":
-            print(ent.text)
+        if ent.label_ == "ORG" or ent.label_ == "PERSON":
             return ent.text.strip()
             
     return None
@@ -34,7 +33,8 @@ def extract_text_from_pdf(pdf_path):
 
 def extract_contact_info(text):
     email = re.search(r'[\w\.-]+@[\w\.-]+', text)
-    phone_number = re.search(r'(\+\d{1,2}[-\s\.]?\d{3}[-\s\.]?\d{3}[-\s\.]?\d{4})', text, re.DOTALL)
+    re_string = r"\+\d{1,2}\s*\(?\d{3}\)?\s*[-\s.]*\d{3}[-\s.]*\d{4}"
+    phone_number = re.search(re_string, text)
     name = extract_name_with_nlp(text)
     
     return {
@@ -63,11 +63,6 @@ def extract_section(text, start_keyword, end_keywords):
         return section_content[:end_index].strip()
     
     return section_content
-
-# Helper function
-def find_text_between(full_text, start_keyword, end_keywords):
-    # ... (your Python implementation of the function) ...
-    pass
 
 @api_bp.route('/status')
 def status():
@@ -109,8 +104,10 @@ def upload_resume():
 
         cleaned_text = re.sub(r'[\r\n\t]+', ' ', text)
         contact_info = extract_contact_info(cleaned_text)
-        skills = extract_section(cleaned_text, 'skills', ['experience', 'education', 'work', 'employment'])
+        education = extract_section(cleaned_text, 'education', ['extracurricular', 'skills', 'leadership', 'projects', 'experience'])
+        skills = extract_section(cleaned_text, 'skills', ['experience', 'education', 'employment', 'projects', 'leadership'])
         experience = extract_section(cleaned_text, 'experience', ['education', 'extracurricular', 'skills', 'leadership', 'projects'])
+        projects = extract_section(cleaned_text, 'projects', ['education', 'extracurricular', 'skills', 'leadership', 'experience'])
 
         # Clean up the uploaded file after processing (optional)
         # os.remove(filepath)
@@ -121,6 +118,8 @@ def upload_resume():
             'contact': contact_info,
             'skills': skills, 
             'experience': experience,
+            'education': education,
+            'projects': projects,
             'raw_text_length': len(text)  # For debugging
         }), 200
 
