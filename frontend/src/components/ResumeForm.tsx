@@ -76,6 +76,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [newSkill, setNewSkill] = useState('');
 
   // Form data state
@@ -146,31 +147,105 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     }
   }, [initialData]);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setUploadedFile(file);
       setIsUploading(true);
       setUploadProgress(0);
+      setUploadError(null); // Clear any previous errors
 
-      // Simulate upload and parsing
-      const interval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setIsUploading(false);
-            
-            // Simulate parsing and populate form
-            setTimeout(() => {
-              setFormData(mockParsedData);
-            }, 500);
-            
-            return 100;
-          }
-          return prev + 10;
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('resume', file);
+
+      try {
+        // Simulate progress for better UX
+        const progressInterval = setInterval(() => {
+          setUploadProgress((prev) => {
+            if (prev >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return prev + 10;
+          });
+        }, 200);
+
+        // Make API call to backend
+        const response = await fetch('http://localhost:5001/api/upload-resume', {
+          method: 'POST',
+          body: formData,
         });
-      }, 200);
+
+        clearInterval(progressInterval);
+        setUploadProgress(100);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Backend response:', data);
+
+          // Transform backend response to match ResumeData interface
+          const parsedData: ResumeData = {
+            name: data.contact?.name || '',
+            email: data.contact?.email || '',
+            phone: data.contact?.phone || '',
+            location: '', // Not extracted by backend yet
+            summary: '', // Not extracted by backend yet
+            skills: data.skills ? data.skills.split(/[,\n•·-]/).map((skill: string) => skill.trim()).filter((skill: string) => skill.length > 0) : [],
+            workExperience: data.experience ? parseWorkExperience(data.experience) : [],
+            education: [], // Not extracted by backend yet
+            projects: [] // Not extracted by backend yet
+          };
+
+          setFormData(parsedData);
+          setUploadError(null); // Clear any previous errors
+          setIsUploading(false);
+        } else {
+          const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
+          console.error('Upload failed:', response.statusText);
+          setUploadError(errorData.message || 'Failed to upload and parse resume');
+          setIsUploading(false);
+          setUploadProgress(0);
+        }
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        setUploadError('Network error occurred while uploading file');
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
     }
+  };
+
+  // Helper function to parse work experience text into structured format
+  const parseWorkExperience = (experienceText: string): WorkExperience[] => {
+    if (!experienceText) return [];
+    
+    // Basic parsing - you can enhance this based on your backend's output format
+    const experiences: WorkExperience[] = [];
+    
+    // Split by common delimiters and create experience entries
+    const sections = experienceText.split(/\n\n|\n•|\n-/).filter(section => section.trim().length > 0);
+    
+    sections.forEach((section, index) => {
+      const lines = section.trim().split('\n').filter(line => line.trim().length > 0);
+      if (lines.length > 0) {
+        experiences.push({
+          id: Date.now().toString() + index,
+          company: lines[0] || '',
+          position: lines[1] || '',
+          duration: lines[2] || '',
+          description: lines.slice(3).join(' ') || section.trim()
+        });
+      }
+    });
+
+    return experiences.length > 0 ? experiences : [{
+      id: Date.now().toString(),
+      company: '',
+      position: '',
+      duration: '',
+      description: experienceText.trim()
+    }];
   };
 
   const handleInputChange = (field: keyof ResumeData, value: any) => {
@@ -352,9 +427,15 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
             </Box>
           )}
 
-          {uploadedFile && !isUploading && (
+          {uploadedFile && !isUploading && !uploadError && (
             <Alert severity="success" sx={{ mt: 2 }}>
               Resume uploaded and parsed successfully! You can now edit the details below.
+            </Alert>
+          )}
+
+          {uploadError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {uploadError}
             </Alert>
           )}
         </Paper>

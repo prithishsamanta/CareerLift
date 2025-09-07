@@ -75,30 +75,55 @@ def status():
 
 @api_bp.route('/upload-resume', methods=['POST'])
 def upload_resume():
-    if 'resume' not in request.files:
-        return jsonify({'message': 'No file uploaded'}), 400
-    file = request.files['resume']
+    try:
+        if 'resume' not in request.files:
+            return jsonify({'message': 'No file uploaded'}), 400
+        
+        file = request.files['resume']
 
-    if file.filename == '':
-        return jsonify({'message': 'No selected file'}), 400
-    
-    if file:
+        if file.filename == '':
+            return jsonify({'message': 'No selected file'}), 400
+        
+        # Validate file type
+        if not file.filename.lower().endswith(('.pdf', '.doc', '.docx')):
+            return jsonify({'message': 'Invalid file type. Please upload PDF, DOC, or DOCX files only.'}), 400
+        
         filename = secure_filename(file.filename)
-        # Assuming you've configured UPLOAD_FOLDER in app.py
-        upload_folder = '../uploads' # Or get from app.config
+        
+        # Create uploads directory if it doesn't exist
+        upload_folder = '../uploads'
+        os.makedirs(upload_folder, exist_ok=True)
+        
         filepath = os.path.join(upload_folder, filename)
         file.save(filepath)
 
-        text = extract_text_from_pdf(filepath)
+        # Extract text based on file type
+        if filename.lower().endswith('.pdf'):
+            text = extract_text_from_pdf(filepath)
+        else:
+            # For now, only handle PDFs. You can extend this for DOC/DOCX later
+            return jsonify({'message': 'Only PDF files are currently supported for parsing.'}), 400
+
+        if not text or len(text.strip()) < 50:
+            return jsonify({'message': 'Could not extract sufficient text from the resume. Please ensure the file is not corrupted and contains readable text.'}), 400
+
         cleaned_text = re.sub(r'[\r\n\t]+', ' ', text)
         contact_info = extract_contact_info(cleaned_text)
-        skills = extract_section(cleaned_text, 'skills', ['experience', 'education'])
-        experience = extract_section(cleaned_text, 'experience', ['education', 'extracurricular', 'skills', 'leadership'])
+        skills = extract_section(cleaned_text, 'skills', ['experience', 'education', 'work', 'employment'])
+        experience = extract_section(cleaned_text, 'experience', ['education', 'extracurricular', 'skills', 'leadership', 'projects'])
+
+        # Clean up the uploaded file after processing (optional)
+        # os.remove(filepath)
 
         return jsonify({
-            'message': 'Resume uploaded successfully',
+            'message': 'Resume uploaded and parsed successfully',
             'filename': filename,
             'contact': contact_info,
             'skills': skills, 
-            'experience': experience 
+            'experience': experience,
+            'raw_text_length': len(text)  # For debugging
         }), 200
+
+    except Exception as e:
+        print(f"Error processing resume: {str(e)}")
+        return jsonify({'message': f'Error processing resume: {str(e)}'}), 500
