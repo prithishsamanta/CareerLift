@@ -1,18 +1,55 @@
-from flask import Flask
-from api_routes import api_bp
+from flask import Flask, request, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
+import logging
 
+# Load environment variables
+load_dotenv()
+
+# Initialize Flask app
 app = Flask(__name__)
-CORS(app)
-app.config['UPLOAD_FOLDER'] = '../uploads'
 
-# Register the blueprint
+# Configure CORS
+CORS(app, origins=["http://localhost:3000"])  # Allow frontend to connect
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Import routes
+from routes.api_routes import api_bp
+
+# Register blueprints
 app.register_blueprint(api_bp, url_prefix='/api')
 
-# Main routes
-@app.route('/')
-def home():
-    return 'Welcome to the Flask API!'
+@app.route('/', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'success',
+        'message': 'Flask backend is running!',
+        'version': '1.0.0'
+    })
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        'status': 'error',
+        'message': 'Endpoint not found'
+    }), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f"Internal server error: {error}")
+    return jsonify({
+        'status': 'error',
+        'message': 'Internal server error'
+    }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    port = int(os.getenv('PORT', 5001))
+    debug = os.getenv('FLASK_ENV') == 'development'
+    
+    logger.info(f"Starting Flask server on port {port}")
+    app.run(host='0.0.0.0', port=port, debug=debug)
