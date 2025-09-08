@@ -29,7 +29,7 @@ const ExtractPage = () => {
             formData.append('resume', file);
 
             try {
-                const response = await fetch('http://localhost:3000/api/upload-resume', {
+                const response = await fetch('http://localhost:5001/api/resume/upload', {
                     method: 'POST',
                     body: formData,
                 });
@@ -41,8 +41,12 @@ const ExtractPage = () => {
                     console.log('File uploaded:', data);
 
                     // Set skills and work experience from backend response
-                    setSkills(data.skills || '');
-                    setWorkExperience(data.experience || '');
+                    const parsedData = data.parsed_data;
+                    setSkills(parsedData.skills ? parsedData.skills.join(', ') : '');
+                    setWorkExperience(parsedData.work_experience ? 
+                        parsedData.work_experience.map((exp: any) => 
+                            `${exp.position} at ${exp.company} (${exp.duration}): ${exp.description}`
+                        ).join('\n\n') : '');
                 } else {
                     setUploadStatus('Upload failed.');
                 }

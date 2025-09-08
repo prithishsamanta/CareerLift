@@ -1,96 +1,84 @@
 from flask import Blueprint, request, jsonify
 import logging
 
+from utils.groq_llama_parser import parse_resume
+from utils.pdf_extractor import extract_text_from_pdf
+
 logger = logging.getLogger(__name__)
 
 # Create Blueprint for API routes
 api_bp = Blueprint('api', __name__)
 
+# ✅ Health check
 @api_bp.route('/health', methods=['GET'])
 def api_health():
-    """API health check"""
     return jsonify({
         'status': 'success',
         'message': 'API is working correctly'
     })
 
-@api_bp.route('/auth/login', methods=['POST'])
-def login():
-    """User login endpoint"""
+# ✅ Resume upload and parsing endpoint
+@api_bp.route('/resume/upload', methods=['POST'])
+def upload_and_parse_resume():
+    """
+    Upload resume file and parse it using Groq/Llama
+    Returns structured JSON with Skills, Education, Work Experience, Projects
+    """
     try:
-        data = request.get_json()
-        
-        if not data:
+        # Check if file is present in request
+        if 'resume' not in request.files:
             return jsonify({
                 'status': 'error',
-                'message': 'No data provided'
+                'message': 'No resume file provided'
             }), 400
         
-        email = data.get('email')
-        password = data.get('password')
+        file = request.files['resume']
         
-        if not email or not password:
+        # Check if file is selected
+        if file.filename == '':
             return jsonify({
                 'status': 'error',
-                'message': 'Email and password are required'
+                'message': 'No file selected'
             }), 400
         
-        # TODO: Implement actual authentication logic with database
-        # For now, return a mock response
-        return jsonify({
+        # Check file type - only PDF allowed
+        file_extension = '.' + file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+        
+        if file_extension != '.pdf':
+            return jsonify({
+                'status': 'error',
+                'message': 'Only PDF files are supported. Please upload a PDF file.'
+            }), 400
+        
+        # Extract text from PDF
+        file_content = file.read()
+        extracted_text = extract_text_from_pdf(file_content)
+        
+        if not extracted_text:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to extract text from the uploaded file'
+            }), 400
+        
+        # Parse resume using Groq/Llama
+        parsed_data = parse_resume(extracted_text)
+        
+        # Add metadata
+        response_data = {
             'status': 'success',
-            'message': 'Login successful',
-            'user': {
-                'id': 1,
-                'email': email,
-                'name': 'Test User'
-            }
-        })
+            'message': 'Resume parsed successfully',
+            'filename': file.filename,
+            'extracted_text_length': len(extracted_text),
+            'parsed_data': parsed_data
+        }
+        
+        return jsonify(response_data)
         
     except Exception as e:
-        logger.error(f"Login error: {e}")
+        logger.error(f"Resume upload/parse error: {e}")
         return jsonify({
             'status': 'error',
-            'message': 'Login failed'
+            'message': f'Failed to process resume: {str(e)}'
         }), 500
 
-@api_bp.route('/auth/signup', methods=['POST'])
-def signup():
-    """User signup endpoint"""
-    try:
-        data = request.get_json()
-        
-        if not data:
-            return jsonify({
-                'status': 'error',
-                'message': 'No data provided'
-            }), 400
-        
-        email = data.get('email')
-        password = data.get('password')
-        name = data.get('name')
-        
-        if not email or not password or not name:
-            return jsonify({
-                'status': 'error',
-                'message': 'Name, email and password are required'
-            }), 400
-        
-        # TODO: Implement actual user creation logic with database
-        # For now, return a mock response
-        return jsonify({
-            'status': 'success',
-            'message': 'User created successfully',
-            'user': {
-                'id': 1,
-                'email': email,
-                'name': name
-            }
-        })
-        
-    except Exception as e:
-        logger.error(f"Signup error: {e}")
-        return jsonify({
-            'status': 'error',
-            'message': 'Signup failed'
-        }), 500
+
