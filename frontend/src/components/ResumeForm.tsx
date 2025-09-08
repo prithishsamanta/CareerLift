@@ -172,7 +172,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         }, 200);
 
         // Make API call to backend
-        const response = await fetch('http://localhost:5001/api/upload-resume', {
+        const response = await fetch('http://localhost:5001/api/resume/upload', {
           method: 'POST',
           body: formData,
         });
@@ -185,16 +185,17 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
           console.log('Backend response:', data);
 
           // Transform backend response to match ResumeData interface
+          const backendData = data.parsed_data;
           const parsedData: ResumeData = {
-            name: data.contact?.name || '',
-            email: data.contact?.email || '',
-            phone: data.contact?.phone || '',
+            name: '', // Extract from work experience or education if available
+            email: '', // Not extracted by backend yet
+            phone: '', // Not extracted by backend yet
             location: '', // Not extracted by backend yet
             summary: '', // Not extracted by backend yet
-            skills: data.skills ? data.skills.split(/[,\n•·-]/).map((skill: string) => skill.trim()).filter((skill: string) => skill.length > 0) : [],
-            workExperience: data.experience ? parseWorkExperience(data.experience) : [],
-            education: [], // Not extracted by backend yet
-            projects: [] // Not extracted by backend yet
+            skills: backendData.skills || [],
+            workExperience: backendData.work_experience || [],
+            education: backendData.education || [],
+            projects: backendData.projects || []
           };
 
           setFormData(parsedData);

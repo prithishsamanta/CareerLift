@@ -11,7 +11,7 @@ load_dotenv()
 app = Flask(__name__)
 
 # Configure CORS
-CORS(app, origins=["http://localhost:3000"])  # Allow frontend to connect
+CORS(app, origins=["http://localhost:3000", "http://localhost:3001"])  # Allow frontend to connect
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
