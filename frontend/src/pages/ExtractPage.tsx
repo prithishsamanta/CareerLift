@@ -45,7 +45,7 @@ const ExtractPage = () => {
                     setSkills(parsedData.skills ? parsedData.skills.join(', ') : '');
                     setWorkExperience(parsedData.work_experience ? 
                         parsedData.work_experience.map((exp: any) => 
-                            `${exp.position} at ${exp.company} (${exp.duration}): ${exp.responsibilities}`
+                            `${exp.position} at ${exp.company} (${exp.duration}): ${exp.description}`
                         ).join('\n\n') : '');
                 } else {
                     setUploadStatus('Upload failed.');

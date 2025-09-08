@@ -19,7 +19,7 @@ Extract structured information from the following resume and return it as a vali
 
 1. "skills": Array of technical skills (programming languages, frameworks, tools, etc.)
 2. "education": Array of education objects with keys: "degree", "institution", "year", "details"
-3. "work_experience": Array of work experience objects with keys: "position", "company", "duration", "responsibilities"
+3. "work_experience": Array of work experience objects with keys: "position", "company", "duration", "description"
 4. "projects": Array of project objects with keys: "name", "description", "technologies", "duration"
 
 Important:
