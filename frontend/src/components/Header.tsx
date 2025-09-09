@@ -42,6 +42,7 @@ const Header: React.FC = () => {
 
   const navItems = [
     { path: "/", label: "Workspaces", icon: <Work /> },
+    { path: "/upload", label: "Upload", icon: <Work /> },
     { path: "/analysis", label: "Analysis", icon: <Psychology /> },
     { path: "/tracker", label: "Tracker", icon: <Schedule /> },
   ];
