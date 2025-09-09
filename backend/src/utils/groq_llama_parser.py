@@ -67,3 +67,58 @@ JSON Response:"""
             "projects": [],
             "error": f"API call failed: {str(e)}"
         }
+
+
+def parse_job_description(job_description_text: str):
+    """
+    Parse job description text and extract structured information using Groq/Llama
+    Returns: JSON with Technical Skills and Technical Synopsis
+    """
+    prompt = f"""
+Extract structured information from the following job description and return it as a valid JSON object with these exact keys:
+
+1. "technical_skills": Array of technical skills required for the job (programming languages, frameworks, tools, technologies, databases, etc.)
+2. "technical_synopsis": A concise technical summary of the job role (2-3 sentences describing the main technical responsibilities and requirements)
+
+Important:
+- Return ONLY valid JSON, no extra text or formatting
+- Focus on technical aspects only
+- If technical skills are not found, return an empty array []
+- Keep the synopsis concise but informative
+- Extract specific technologies, programming languages, frameworks mentioned
+
+Job Description Text:
+\"\"\"
+{job_description_text}
+\"\"\"
+
+JSON Response:"""
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=1000
+        )
+        
+        result = response['choices'][0]['message']['content'].strip()
+        
+        # Try to parse as JSON to validate
+        try:
+            parsed_json = json.loads(result)
+            return parsed_json
+        except json.JSONDecodeError:
+            # If JSON parsing fails, return a structured error
+            return {
+                "technical_skills": [],
+                "technical_synopsis": "",
+                "error": "Failed to parse job description - invalid JSON response from AI"
+            }
+            
+    except Exception as e:
+        return {
+            "technical_skills": [],
+            "technical_synopsis": "",
+            "error": f"API call failed: {str(e)}"
+        }

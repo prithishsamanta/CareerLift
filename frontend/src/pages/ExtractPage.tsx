@@ -1,19 +1,21 @@
 import React, { useState, useRef } from 'react';
+import Header from '../components/Header';
 import '../styles/ExtractPage.css';
 
 // Main App component containing the entire application flow
 const ExtractPage = () => {
-    // State to manage the visibility of the panels
-    const [resumePanelVisible, setResumePanelVisible] = useState(false);
-    const [targetPanelVisible, setTargetPanelVisible] = useState(false);
-    
     // State to manage the file upload progress and status
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadStatus, setUploadStatus] = useState('');
 
-     // State for skills and work experience
-    const [skills, setSkills] = useState('');
-    const [workExperience, setWorkExperience] = useState('');
+    // State for resume data - complete parsed data
+    const [resumeData, setResumeData] = useState<any>(null);
+    
+    // State for job description and parsed data
+    const [jobDescription, setJobDescription] = useState('');
+    const [jobData, setJobData] = useState<any>(null);
+    const [isProcessingJD, setIsProcessingJD] = useState(false);
+    const [jdProcessStatus, setJdProcessStatus] = useState('');
     
     // useRef hook with a generic type to specify the element type
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -40,13 +42,9 @@ const ExtractPage = () => {
                     const data = await response.json();
                     console.log('File uploaded:', data);
 
-                    // Set skills and work experience from backend response
+                    // Set complete resume data from backend response
                     const parsedData = data.parsed_data;
-                    setSkills(parsedData.skills ? parsedData.skills.join(', ') : '');
-                    setWorkExperience(parsedData.work_experience ? 
-                        parsedData.work_experience.map((exp: any) => 
-                            `${exp.position} at ${exp.company} (${exp.duration}): ${exp.description}`
-                        ).join('\n\n') : '');
+                    setResumeData(parsedData);
                 } else {
                     setUploadStatus('Upload failed.');
                 }
@@ -60,6 +58,46 @@ const ExtractPage = () => {
     const handleUploadTrigger = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
+        }
+    };
+
+    // Function to handle job description processing
+    const handleProcessJobDescription = async () => {
+        if (!jobDescription.trim()) {
+            setJdProcessStatus('Please enter a job description first.');
+            return;
+        }
+
+        setIsProcessingJD(true);
+        setJdProcessStatus('Processing job description...');
+
+        try {
+            const response = await fetch('http://localhost:5001/api/job-description/parse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    job_description: jobDescription
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Job description parsed:', data);
+
+                const parsedData = data.parsed_data;
+                setJobData(parsedData);
+                setJdProcessStatus('Job description processed successfully!');
+            } else {
+                const errorData = await response.json().catch(() => ({ message: 'Processing failed' }));
+                setJdProcessStatus(errorData.message || 'Failed to process job description');
+            }
+        } catch (error) {
+            console.error('Error processing job description:', error);
+            setJdProcessStatus('Failed to process job description');
+        } finally {
+            setIsProcessingJD(false);
         }
     };
     
@@ -84,63 +122,26 @@ const ExtractPage = () => {
     );
 
     return (
-        <>
-            <div className="app-container">
-                {/* Main Content Panel - Always visible */}
-                <div className="main-panel">
-                    <div className="panel-title">Taskbar - Showing the same options as home in all the pages</div>
+        <div className="extract-page">
+            {/* Use the proper Header component */}
+            <Header />
 
-                    <div className="button-group">
-                        <button className="button">
-                            Back
-                        </button>
-                        <button 
-                            className="button"
-                            onClick={() => {
-                                setTargetPanelVisible(false);
-                                setResumePanelVisible(!resumePanelVisible);
-                            }}
-                        >
-                            <FileIcon /> Upload / Edit Resume
-                        </button>
-                        <button 
-                            className="button"
-                            onClick={() => {
-                                setResumePanelVisible(false);
-                                setTargetPanelVisible(!targetPanelVisible);
-                            }}
-                        >
-                            <TargetIcon /> Upload / Edit Target
-                        </button>
+            {/* Main Content - Two Cards Layout */}
+            <div className="cards-container">
+                {/* Resume Card */}
+                <div className="card resume-card">
+                    <div className="card-header">
+                        <FileIcon />
+                        <h3>Resume Upload & Analysis</h3>
                     </div>
-
-                    <div className="summary-container">
-                        <div className="summary-box">
-                            <p>Shows the Summary of the uploaded resume</p>
-                        </div>
-                        <div className="summary-box">
-                            <p>Shows the Summary of the target</p>
-                        </div>
-                    </div>
-
-                    <div className="button-group">
-                        <button className="main-button">
-                            Analyze
-                        </button>
-                    </div>
-                </div>
-
-                {/* Resume Panel (Conditionally Rendered) */}
-                {resumePanelVisible && (
-                    <div className="side-panel">
-                        <div className="panel-title">Resume Panel</div>
-
-                        <div className="button-group">
+                    
+                    <div className="card-content">
+                        <div className="upload-section">
                             <button 
-                                className="button"
+                                className="upload-button"
                                 onClick={handleUploadTrigger}
                             >
-                                Upload Resume
+                                Upload Resume (PDF)
                             </button>
                             <input 
                                 type="file" 
@@ -160,6 +161,7 @@ const ExtractPage = () => {
                                 ></div>
                             </div>
                         )}
+                        
                         {/* Upload Status */}
                         {uploadStatus && (
                             <p className="upload-status">
@@ -167,48 +169,166 @@ const ExtractPage = () => {
                             </p>
                         )}
 
-                        <div className="form-group">
-                            <label htmlFor="skills" className="form-label">Skills:</label>
-                            <input 
-                                type="text" 
-                                id="skills" 
-                                placeholder="Skills" 
-                                className="form-input"
-                                value={skills}
-                                onChange={e => setSkills(e.target.value)}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="work-experience" className="form-label">Work Experience:</label>
-                            <textarea 
-                                id="work-experience" 
-                                rows={10} 
-                                placeholder="Work Experience" 
-                                className="form-textarea"
-                                value={workExperience}
-                                onChange={e => setWorkExperience(e.target.value)}
-                            ></textarea>
-                        </div>
-                    </div>
-                )}
+                        {/* Resume Data Display */}
+                        {resumeData && (
+                            <div className="parsed-data-container">
+                                <h4 className="section-title">📄 Parsed Resume Data</h4>
+                                
+                                {/* Skills Section */}
+                                {resumeData.skills && resumeData.skills.length > 0 && (
+                                    <div className="data-section">
+                                        <h5 className="subsection-title">🛠️ Skills</h5>
+                                        <div className="skills-container">
+                                            {resumeData.skills.map((skill: string, index: number) => (
+                                                <span key={index} className="skill-tag">{skill}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
-                {/* Target Panel (Conditionally Rendered) */}
-                {targetPanelVisible && (
-                    <div className="side-panel">
-                        <div className="panel-title">Target Panel</div>
+                                {/* Work Experience Section */}
+                                {resumeData.work_experience && resumeData.work_experience.length > 0 && (
+                                    <div className="data-section">
+                                        <h5 className="subsection-title">💼 Work Experience</h5>
+                                        {resumeData.work_experience.map((exp: any, index: number) => (
+                                            <div key={index} className="experience-item">
+                                                <div className="experience-header">
+                                                    <strong>{exp.position}</strong> at <em>{exp.company}</em>
+                                                    <span className="duration">({exp.duration})</span>
+                                                </div>
+                                                <div className="experience-description">{exp.description}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Education Section */}
+                                {resumeData.education && resumeData.education.length > 0 && (
+                                    <div className="data-section">
+                                        <h5 className="subsection-title">🎓 Education</h5>
+                                        {resumeData.education.map((edu: any, index: number) => (
+                                            <div key={index} className="education-item">
+                                                <div className="education-header">
+                                                    <strong>{edu.degree}</strong>
+                                                    <span className="duration">({edu.year})</span>
+                                                </div>
+                                                <div className="education-institution">{edu.institution}</div>
+                                                {edu.details && <div className="education-details">{edu.details}</div>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Projects Section */}
+                                {resumeData.projects && resumeData.projects.length > 0 && (
+                                    <div className="data-section">
+                                        <h5 className="subsection-title">🚀 Projects</h5>
+                                        {resumeData.projects.map((project: any, index: number) => (
+                                            <div key={index} className="project-item">
+                                                <div className="project-header">
+                                                    <strong>{project.name}</strong>
+                                                    {project.duration && <span className="duration">({project.duration})</span>}
+                                                </div>
+                                                <div className="project-description">{project.description}</div>
+                                                {project.technologies && (
+                                                    <div className="project-technologies">
+                                                        <strong>Technologies:</strong> {project.technologies}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Error Display */}
+                                {resumeData.error && (
+                                    <div className="error-section">
+                                        <h5 className="subsection-title">⚠️ Error</h5>
+                                        <div className="error-message">{resumeData.error}</div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Job Description Card */}
+                <div className="card job-card">
+                    <div className="card-header">
+                        <TargetIcon />
+                        <h3>Job Description Analysis</h3>
+                    </div>
+                    
+                    <div className="card-content">
                         <div className="form-group">
-                            <label htmlFor="target-description" className="form-label">Target Description:</label>
+                            <label htmlFor="job-description" className="form-label">Job Description:</label>
                             <textarea 
-                                id="target-description" 
-                                rows={15} 
-                                placeholder="Enter the description of your target job or role" 
+                                id="job-description" 
+                                rows={8} 
+                                placeholder="Enter the job description text here..." 
                                 className="form-textarea"
+                                value={jobDescription}
+                                onChange={e => setJobDescription(e.target.value)}
                             ></textarea>
                         </div>
+
+                        <div className="button-group">
+                            <button 
+                                className="process-button"
+                                onClick={handleProcessJobDescription}
+                                disabled={isProcessingJD || !jobDescription.trim()}
+                            >
+                                {isProcessingJD ? 'Processing...' : 'Process Job Description'}
+                            </button>
+                        </div>
+
+                        {/* Processing Status */}
+                        {jdProcessStatus && (
+                            <p className="upload-status">
+                                {jdProcessStatus}
+                            </p>
+                        )}
+
+                        {/* Job Description Data Display */}
+                        {jobData && (
+                            <div className="parsed-data-container">
+                                <h4 className="section-title">🎯 Parsed Job Description</h4>
+                                
+                                {/* Technical Skills Section */}
+                                {jobData.technical_skills && jobData.technical_skills.length > 0 && (
+                                    <div className="data-section">
+                                        <h5 className="subsection-title">🛠️ Technical Skills Required</h5>
+                                        <div className="skills-container">
+                                            {jobData.technical_skills.map((skill: string, index: number) => (
+                                                <span key={index} className="skill-tag job-skill-tag">{skill}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Technical Synopsis Section */}
+                                {jobData.technical_synopsis && (
+                                    <div className="data-section">
+                                        <h5 className="subsection-title">📋 Technical Synopsis</h5>
+                                        <div className="synopsis-content">
+                                            {jobData.technical_synopsis}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Error Display */}
+                                {jobData.error && (
+                                    <div className="error-section">
+                                        <h5 className="subsection-title">⚠️ Error</h5>
+                                        <div className="error-message">{jobData.error}</div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 import logging
 
-from utils.groq_llama_parser import parse_resume
+from utils.groq_llama_parser import parse_resume, parse_job_description
 from utils.pdf_extractor import extract_text_from_pdf
 
 logger = logging.getLogger(__name__)
@@ -79,6 +79,53 @@ def upload_and_parse_resume():
         return jsonify({
             'status': 'error',
             'message': f'Failed to process resume: {str(e)}'
+        }), 500
+
+
+# ✅ Job description parsing endpoint
+@api_bp.route('/job-description/parse', methods=['POST'])
+def parse_job_description_text():
+    """
+    Parse job description text using Groq/Llama
+    Returns structured JSON with Technical Skills and Technical Synopsis
+    """
+    try:
+        # Check if JSON data is present in request
+        if not request.is_json:
+            return jsonify({
+                'status': 'error',
+                'message': 'Request must contain JSON data'
+            }), 400
+        
+        data = request.get_json()
+        
+        # Check if job_description is provided
+        if 'job_description' not in data or not data['job_description'].strip():
+            return jsonify({
+                'status': 'error',
+                'message': 'Job description text is required'
+            }), 400
+        
+        job_description_text = data['job_description'].strip()
+        
+        # Parse job description using Groq/Llama
+        parsed_data = parse_job_description(job_description_text)
+        
+        # Add metadata
+        response_data = {
+            'status': 'success',
+            'message': 'Job description parsed successfully',
+            'text_length': len(job_description_text),
+            'parsed_data': parsed_data
+        }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        logger.error(f"Job description parse error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to process job description: {str(e)}'
         }), 500
 
 
