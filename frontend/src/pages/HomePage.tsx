@@ -51,8 +51,7 @@ const HomePage: React.FC = () => {
       setNewWorkspaceName("");
       setCreateDialogOpen(false);
 
-      // Redirect to Analysis page
-      navigate("/analysis");
+      // Don't automatically redirect - let user click on the new card
     }
   };
 
