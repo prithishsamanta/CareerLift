@@ -51,8 +51,7 @@ const HomePage: React.FC = () => {
       setNewWorkspaceName("");
       setCreateDialogOpen(false);
 
-      // Redirect to Analysis page
-      navigate("/analysis");
+      // Don't automatically redirect - let user click on the new card
     }
   };
 
@@ -88,7 +87,6 @@ const HomePage: React.FC = () => {
                 >
                   <CardContent className="workspace-content">
                     <Box className="workspace-header">
-                      <Work className="workspace-icon" />
                       <Typography variant="h6" className="workspace-name">
                         {workspace.name}
                       </Typography>
@@ -124,7 +122,7 @@ const HomePage: React.FC = () => {
               >
                 <CardContent className="create-workspace-content">
                   <Box className="create-workspace-icon">
-                    <Add sx={{ fontSize: 32, color: "#3b82f6" }} />
+                    <Add sx={{ fontSize: 24, color: "#3b82f6" }} />
                   </Box>
                   <Typography variant="h6" className="create-workspace-text">
                     Create New Workspace

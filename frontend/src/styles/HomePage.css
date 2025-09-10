@@ -100,24 +100,28 @@
 
 .workspace-grid-item {
   flex: 0 0 calc(100% - 24px);
-  min-width: 280px;
+  min-width: 240px;
+  min-height: 180px;
 }
 
 @media (min-width: 600px) {
   .workspace-grid-item {
-    flex: 0 0 calc(50% - 12px);
+    flex: 0 0 calc(45% - 12px);
+    min-height: 200px;
   }
 }
 
 @media (min-width: 960px) {
   .workspace-grid-item {
-    flex: 0 0 calc(33.333% - 16px);
+    flex: 0 0 calc(30% - 16px);
+    min-height: 220px;
   }
 }
 
 @media (min-width: 1280px) {
   .workspace-grid-item {
-    flex: 0 0 calc(25% - 18px);
+    flex: 0 0 calc(22% - 18px);
+    min-height: 240px;
   }
 }
 
@@ -144,37 +148,36 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .workspace-header {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  justify-content: center;
+  margin-bottom: 0.75rem;
 }
 
-.workspace-icon {
-  color: #3182ce !important;
-  font-size: 1.5rem !important;
-  margin-right: 0.75rem !important;
-}
+/* Workspace icon styles removed - no longer needed */
 
 .workspace-name {
   color: #2d3748 !important;
   font-weight: 700 !important;
-  font-size: 1.25rem !important;
+  font-size: 1.5rem !important;
   margin: 0 !important;
 }
 
 .workspace-description {
   color: #4a5568 !important;
   font-size: 0.875rem !important;
-  line-height: 1.5 !important;
-  margin-bottom: 1rem !important;
-  flex-grow: 1;
+  line-height: 1.4 !important;
+  margin-bottom: 0.75rem !important;
 }
 
 .workspace-meta {
-  margin-top: auto;
+  margin-top: 0;
 }
 
 .workspace-chip {
@@ -188,50 +191,49 @@
 .create-workspace-card {
   background: #ffffff !important;
   border-radius: 16px !important;
-  border: 2px solid #e2e8f0;
+  border: 2px dashed #cbd5e0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
   transition: all 0.3s ease !important;
   cursor: pointer;
-  height: 280px;
-  width: 280px;
+  height: 100%;
   overflow: hidden;
-  margin: 16px auto;
 }
 
 .create-workspace-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-  border-color: #3b82f6;
+  border-color: #3182ce;
+  border-style: solid;
 }
 
 .create-workspace-content {
-  padding: 16px 24px 32px 24px !important;
+  padding: 0.75rem 1.5rem 1.5rem 1.5rem !important;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 16px;
 }
 
 .create-workspace-icon {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 64px;
-  height: 64px;
-  background: #f8fafc;
-  border-radius: 50%;
-  border: 2px solid #e2e8f0;
+  width: 40px;
+  height: 40px;
+  background: #f0f9ff;
+  border-radius: 10px;
+  border: 1px solid #bfdbfe;
   transition: all 0.3s ease;
+  margin-bottom: 1rem;
 }
 
 .create-workspace-text {
-  color: #1a202c !important;
-  font-weight: 600 !important;
+  color: #2d3748 !important;
+  font-weight: 700 !important;
   font-size: 1.125rem !important;
-  margin: 0 !important;
+  margin: 0 0 0.5rem 0 !important;
 }
 
 /* Create Workspace Dialog */
@@ -391,10 +393,6 @@
 }
 
 /* Hover effects for interactive elements */
-.workspace-card:hover .workspace-icon {
-  transform: scale(1.1);
-  transition: transform 0.3s ease;
-}
 
 .create-workspace-card:hover .create-workspace-icon {
   transform: scale(1.1);
