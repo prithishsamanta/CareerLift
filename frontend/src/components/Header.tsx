@@ -19,6 +19,7 @@ import {
   Psychology,
   Schedule,
   Work,
+  Logout,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -38,10 +39,19 @@ const Header: React.FC = () => {
     setMobileOpen(false);
   };
 
+  const handleLogout = () => {
+    // Clear any stored auth data
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userEmail');
+    // Navigate to login page
+    navigate('/');
+    setMobileOpen(false);
+  };
+
   const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
-    { path: "/", label: "Workspaces", icon: <Work /> },
+    { path: "/home", label: "Home", icon: <Work /> },
     { path: "/upload", label: "Upload", icon: <Work /> },
     { path: "/analysis", label: "Analysis", icon: <Psychology /> },
     { path: "/tracker", label: "Tracker", icon: <Schedule /> },
@@ -70,6 +80,25 @@ const Header: React.FC = () => {
             <ListItemText primary={item.label} />
           </ListItem>
         ))}
+        
+        {/* Mobile Logout Button */}
+        <ListItem
+          onClick={handleLogout}
+          sx={{
+            backgroundColor: "transparent",
+            color: "error.main",
+            borderRadius: 1,
+            mx: 1,
+            mt: 2,
+            border: "1px solid",
+            borderColor: "error.main",
+            "&:hover": {
+              backgroundColor: "rgba(211, 47, 47, 0.08)",
+            },
+          }}
+        >
+          <ListItemText primary="Logout" />
+        </ListItem>
       </List>
     </Box>
   );
@@ -111,7 +140,7 @@ const Header: React.FC = () => {
 
             {/* Desktop Navigation */}
             {!isMobile && (
-              <Box display="flex" gap={2}>
+              <Box display="flex" gap={2} alignItems="center">
                 {navItems.map((item) => (
                   <Button
                     key={item.path}
@@ -135,6 +164,25 @@ const Header: React.FC = () => {
                     </Box>
                   </Button>
                 ))}
+                
+                {/* Logout Button */}
+                <Button
+                  onClick={handleLogout}
+                  sx={{
+                    color: "error.main",
+                    fontWeight: 500,
+                    textTransform: "none",
+                    fontSize: "1rem",
+                    ml: 2,
+                    "&:hover": {
+                      backgroundColor: "rgba(211, 47, 47, 0.08)",
+                      color: "error.dark",
+                    },
+                  }}
+                >
+                  <Logout sx={{ mr: 1, fontSize: "1.2rem" }} />
+                  Logout
+                </Button>
               </Box>
             )}
 

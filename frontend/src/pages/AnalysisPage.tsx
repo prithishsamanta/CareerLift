@@ -12,7 +12,6 @@ import {
   Divider
 } from '@mui/material';
 import {
-  ArrowBack,
   Edit,
   Chat,
   Schedule,
@@ -22,6 +21,7 @@ import {
   Work
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
 import Chatbot from '../components/Chatbot';
 import '../styles/AnalysisPage.css';
 
@@ -73,25 +73,8 @@ const AnalysisPage: React.FC = () => {
 
   return (
     <Box className="analysis-page">
-      {/* Header */}
-      <Box className="header-section">
-        <Container maxWidth="lg">
-          <Box display="flex" alignItems="center" justifyContent="space-between" py={3}>
-            <Typography variant="h3" className="page-title">
-              <Psychology sx={{ mr: 2, fontSize: 'inherit' }} />
-              Skill Gap Analysis
-            </Typography>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBack />}
-              onClick={handleBackClick}
-              className="back-button"
-            >
-              Back
-            </Button>
-          </Box>
-        </Container>
-      </Box>
+      {/* Use consistent Header component */}
+      <Header />
 
       <Container maxWidth="lg" className="main-content">
         <Box display="flex" gap={4} flexDirection={{ xs: 'column', lg: 'row' }}>
@@ -99,9 +82,9 @@ const AnalysisPage: React.FC = () => {
           <Box flex="1" maxWidth={{ lg: '66%' }}>
             <Paper className="analysis-card" elevation={3}>
               <CardContent sx={{ p: 4 }}>
-                <Box display="flex" alignItems="center" mb={3}>
-                  <TrendingUp sx={{ mr: 2, color: 'primary.main' }} />
-                  <Typography variant="h4" className="section-title">
+                <Box display="flex" alignItems="center" mb={3} sx={{ background: 'transparent' }}>
+                  <TrendingUp sx={{ mr: 2, color: '#6b7280' }} />
+                  <Typography variant="h4" className="section-title" sx={{ background: 'transparent' }}>
                     Your Skill Analysis
                   </Typography>
                 </Box>

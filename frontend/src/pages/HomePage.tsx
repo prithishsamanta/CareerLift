@@ -13,21 +13,14 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  AppBar,
-  Toolbar,
   Chip,
 } from "@mui/material";
 import {
   Add,
   Work,
-  Search,
-  FilterList,
-  Sort,
-  Settings,
-  Notifications,
-  AccountCircle,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import Header from '../components/Header';
 import "../styles/HomePage.css";
 
 interface Workspace {
@@ -78,56 +71,8 @@ const HomePage: React.FC = () => {
 
   return (
     <Box className="home-page">
-      {/* Task Bar */}
-      <AppBar position="static" className="task-bar" elevation={1}>
-        <Toolbar className="task-toolbar">
-          <Box className="task-left">
-            <Typography variant="h6" className="page-title">
-              <Work sx={{ mr: 1 }} />
-              My Workspaces
-            </Typography>
-          </Box>
-
-          <Box className="task-center">
-            <Button
-              variant="outlined"
-              startIcon={<Search />}
-              className="task-button"
-              disabled
-            >
-              Search Workspaces
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<FilterList />}
-              className="task-button"
-              disabled
-            >
-              Filter
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<Sort />}
-              className="task-button"
-              disabled
-            >
-              Sort
-            </Button>
-          </Box>
-
-          <Box className="task-right">
-            <IconButton className="task-icon-button" disabled>
-              <Notifications />
-            </IconButton>
-            <IconButton className="task-icon-button" disabled>
-              <Settings />
-            </IconButton>
-            <IconButton className="task-icon-button" disabled>
-              <AccountCircle />
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      {/* Use consistent Header component */}
+      <Header />
 
       {/* Main Content */}
       <Container maxWidth="lg" className="main-content">
