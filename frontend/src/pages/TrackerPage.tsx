@@ -18,16 +18,15 @@ import {
   Paper
 } from '@mui/material';
 import {
-  ArrowBack,
   CalendarToday,
   CheckCircle,
-  Schedule,
   TrendingUp,
   Assignment,
   NavigateBefore,
   NavigateNext
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
 import Chatbot, { FloatingChatButton } from '../components/Chatbot';
 import '../styles/TrackerPage.css';
 
@@ -107,25 +106,8 @@ const TrackerPage: React.FC = () => {
 
   return (
     <Box className="tracker-page">
-      {/* Header */}
-      <Box className="header-section">
-        <Container maxWidth="lg">
-          <Box display="flex" alignItems="center" justifyContent="space-between" py={3}>
-            <Typography variant="h3" className="page-title">
-              <Schedule sx={{ mr: 2, fontSize: 'inherit' }} />
-              Progress Tracker
-            </Typography>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBack />}
-              onClick={handleBackClick}
-              className="back-button"
-            >
-              Back to Analysis
-            </Button>
-          </Box>
-        </Container>
-      </Box>
+      {/* Use consistent Header component */}
+      <Header />
 
       <Container maxWidth="xl" className="main-content">
         {/* View Mode Toggle */}
