@@ -1,9 +1,12 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import '../styles/ExtractPage.css';
 
 // Main App component containing the entire application flow
 const ExtractPage = () => {
+    const navigate = useNavigate();
+    
     // State to manage the file upload progress and status
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadStatus, setUploadStatus] = useState('');
@@ -327,6 +330,16 @@ const ExtractPage = () => {
                         )}
                     </div>
                 </div>
+            </div>
+            
+            {/* Generate Analysis Button */}
+            <div className="analysis-button-container">
+                <button 
+                    className="generate-analysis-btn"
+                    onClick={() => navigate('/analysis')}
+                >
+                    Generate Analysis
+                </button>
             </div>
         </div>
     );
