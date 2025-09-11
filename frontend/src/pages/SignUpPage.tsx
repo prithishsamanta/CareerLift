@@ -21,6 +21,7 @@ import {
   Person
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/SignUpPage.css';
 
 interface FormData {
@@ -33,6 +34,7 @@ interface FormData {
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -45,6 +47,7 @@ const SignUpPage: React.FC = () => {
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({
@@ -97,23 +100,27 @@ const SignUpPage: React.FC = () => {
 
     setIsLoading(true);
     setSuccessMessage('');
+    setErrorMessage('');
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setSuccessMessage('Account created successfully! Redirecting to login...');
+    try {
+      await register({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName
+      });
       
-      // Store user data (in a real app, this would be handled by your backend)
-      localStorage.setItem('registeredUser', JSON.stringify({
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email
-      }));
-
-      // Redirect to login after 2 seconds
+      setSuccessMessage('Account created successfully! Redirecting to home...');
+      
+      // Redirect to home after 2 seconds
       setTimeout(() => {
-        navigate('/');
+        navigate('/home');
       }, 2000);
-    }, 1500);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Registration failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -154,6 +161,13 @@ const SignUpPage: React.FC = () => {
             {successMessage && (
               <Alert severity="success" sx={{ mb: 3 }}>
                 {successMessage}
+              </Alert>
+            )}
+
+            {/* Error Message */}
+            {errorMessage && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {errorMessage}
               </Alert>
             )}
 
