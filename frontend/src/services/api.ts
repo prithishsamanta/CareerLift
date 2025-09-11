@@ -1,20 +1,23 @@
 // API service for communicating with the backend
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'dev.us-east-1.tidbcloud.com/api';
-http://localhost:5001/api';
+const API_BASE_URL = "http://localhost:5001/api";
 
 class ApiService {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('sessionToken');
+    const token = localStorage.getItem("sessionToken");
     return {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
     };
   }
 
   private async handleResponse(response: Response) {
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Network error' }));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: "Network error" }));
+      throw new Error(
+        errorData.message || `HTTP error! status: ${response.status}`
+      );
     }
     return response.json();
   }
@@ -27,9 +30,9 @@ class ApiService {
     lastName: string;
   }) {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(userData),
     });
@@ -38,9 +41,9 @@ class ApiService {
 
   async login(credentials: { email: string; password: string }) {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(credentials),
     });
@@ -49,7 +52,7 @@ class ApiService {
 
   async logout() {
     const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: 'POST',
+      method: "POST",
       headers: this.getAuthHeaders(),
     });
     return this.handleResponse(response);
@@ -65,11 +68,11 @@ class ApiService {
   // Resume endpoints
   async uploadResume(file: File) {
     const formData = new FormData();
-    formData.append('resume', file);
+    formData.append("resume", file);
 
-    const token = localStorage.getItem('sessionToken');
+    const token = localStorage.getItem("sessionToken");
     const response = await fetch(`${API_BASE_URL}/resume/upload`, {
-      method: 'POST',
+      method: "POST",
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
@@ -92,7 +95,7 @@ class ApiService {
     company?: string;
   }) {
     const response = await fetch(`${API_BASE_URL}/job-description/parse`, {
-      method: 'POST',
+      method: "POST",
       headers: this.getAuthHeaders(),
       body: JSON.stringify(data),
     });
@@ -109,8 +112,9 @@ class ApiService {
   // AI suggestions endpoints
   async getAISuggestions(filters?: { type?: string; isRead?: boolean }) {
     const params = new URLSearchParams();
-    if (filters?.type) params.append('type', filters.type);
-    if (filters?.isRead !== undefined) params.append('isRead', filters.isRead.toString());
+    if (filters?.type) params.append("type", filters.type);
+    if (filters?.isRead !== undefined)
+      params.append("isRead", filters.isRead.toString());
 
     const response = await fetch(`${API_BASE_URL}/ai-suggestions?${params}`, {
       headers: this.getAuthHeaders(),
@@ -127,7 +131,7 @@ class ApiService {
     jobDescriptionId?: number;
   }) {
     const response = await fetch(`${API_BASE_URL}/ai-suggestions`, {
-      method: 'POST',
+      method: "POST",
       headers: this.getAuthHeaders(),
       body: JSON.stringify(data),
     });
@@ -135,10 +139,13 @@ class ApiService {
   }
 
   async markSuggestionAsRead(suggestionId: number) {
-    const response = await fetch(`${API_BASE_URL}/ai-suggestions/${suggestionId}/read`, {
-      method: 'PUT',
-      headers: this.getAuthHeaders(),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/ai-suggestions/${suggestionId}/read`,
+      {
+        method: "PUT",
+        headers: this.getAuthHeaders(),
+      }
+    );
     return this.handleResponse(response);
   }
 
