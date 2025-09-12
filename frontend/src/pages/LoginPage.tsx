@@ -22,10 +22,12 @@ import {
   Person
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/LoginPage.css';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -33,10 +35,6 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  // Default login credentials
-  const DEFAULT_EMAIL = 'user@example.com';
-  const DEFAULT_PASSWORD = 'password123';
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -57,23 +55,13 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    // Check against default credentials
-    if (formData.email === DEFAULT_EMAIL && formData.password === DEFAULT_PASSWORD) {
-      // Simulate API call delay
-      setTimeout(() => {
-        setIsLoading(false);
-        // Store login status (you can expand this with proper auth later)
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userEmail', formData.email);
-        
-        // Navigate to home page
-        navigate('/home');
-      }, 1000);
-    } else {
-      setTimeout(() => {
-        setError('Invalid credentials. Use user@example.com / password123');
-        setIsLoading(false);
-      }, 1000);
+    try {
+      await login(formData.email, formData.password);
+      navigate('/home');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Login failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,12 +71,6 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const fillDefaultCredentials = () => {
-    setFormData({
-      email: DEFAULT_EMAIL,
-      password: DEFAULT_PASSWORD
-    });
-  };
 
   return (
     <div className="login-page">
