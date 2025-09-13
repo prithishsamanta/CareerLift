@@ -94,6 +94,24 @@ CREATE TABLE IF NOT EXISTS job_applications (
     INDEX idx_created_at (created_at)
 );
 
+-- Workplaces table to group analysis sessions
+CREATE TABLE IF NOT EXISTS workplaces (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL DEFAULT 'Analysis Session',
+    description TEXT,
+    resume_id BIGINT,
+    job_description_id BIGINT,
+    analysis_data JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE SET NULL,
+    FOREIGN KEY (job_description_id) REFERENCES job_descriptions(id) ON DELETE SET NULL,
+    INDEX idx_user_id (user_id),
+    INDEX idx_created_at (created_at)
+);
+
 -- User sessions table for authentication tracking
 CREATE TABLE IF NOT EXISTS user_sessions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

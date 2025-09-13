@@ -149,6 +149,32 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  // Analysis endpoints
+  async generateAnalysis(data?: { name?: string; description?: string }) {
+    const response = await fetch(`${API_BASE_URL}/analysis/generate`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data || {}),
+    });
+    return this.handleResponse(response);
+  }
+
+  async getWorkplaces() {
+    const response = await fetch(`${API_BASE_URL}/workplaces`, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  }
+
+  async getWorkplace(workplaceId: number) {
+    const response = await fetch(`${API_BASE_URL}/workplaces/${workplaceId}`, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  }
+
   // Health check
   async healthCheck() {
     const response = await fetch(`${API_BASE_URL}/health`);

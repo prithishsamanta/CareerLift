@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+import json
 import logging
 
 from utils.groq_llama_parser import parse_resume, parse_job_description
@@ -7,6 +8,7 @@ from models.user_model import UserModel
 from models.resume_model import ResumeModel
 from models.job_description_model import JobDescriptionModel
 from models.ai_suggestion_model import AISuggestionModel
+from models.workplace_model import WorkplaceModel
 
 logger = logging.getLogger(__name__)
 
@@ -658,6 +660,180 @@ def mark_suggestion_as_read(suggestion_id):
         return jsonify({
             'status': 'error',
             'message': f'Failed to mark suggestion as read: {str(e)}'
+        }), 500
+
+# ✅ Generate Analysis - Create workplace with latest resume and job description
+@api_bp.route('/analysis/generate', methods=['POST'])
+def generate_analysis():
+    """
+    Generate analysis by creating a workplace with latest resume and job description
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get request data
+        data = request.get_json() if request.is_json else {}
+        workplace_name = data.get('name')
+        workplace_description = data.get('description')
+        
+        # Get latest resume and job description for the user
+        latest_data = WorkplaceModel.get_latest_resume_and_job_description(user['id'])
+        
+        if not latest_data['resume']:
+            return jsonify({
+                'status': 'error',
+                'message': 'No resume found. Please upload a resume first.'
+            }), 400
+        
+        if not latest_data['job_description']:
+            return jsonify({
+                'status': 'error',
+                'message': 'No job description found. Please add a job description first.'
+            }), 400
+        
+        # Create workplace with the latest resume and job description
+        workplace = WorkplaceModel.create_workplace(
+            user_id=user['id'],
+            resume_id=latest_data['resume']['id'],
+            job_description_id=latest_data['job_description']['id'],
+            name=workplace_name,
+            description=workplace_description
+        )
+        
+        if not workplace:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to create analysis session'
+            }), 500
+        
+        # Return workplace data with resume and job description info
+        response_data = {
+            'status': 'success',
+            'message': 'Analysis session created successfully',
+            'workplace': workplace,
+            'resume_data': {
+                'id': latest_data['resume']['id'],
+                'filename': latest_data['resume']['filename'],
+                'parsed_data': json.loads(latest_data['resume']['parsed_data']) if latest_data['resume']['parsed_data'] else None
+            },
+            'job_description_data': {
+                'id': latest_data['job_description']['id'],
+                'title': latest_data['job_description']['title'],
+                'company': latest_data['job_description']['company'],
+                'parsed_data': json.loads(latest_data['job_description']['parsed_data']) if latest_data['job_description']['parsed_data'] else None
+            }
+        }
+        
+        return jsonify(response_data), 201
+        
+    except Exception as e:
+        logger.error(f"Generate analysis error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to generate analysis: {str(e)}'
+        }), 500
+
+# ✅ Get user's workplaces
+@api_bp.route('/workplaces', methods=['GET'])
+def get_user_workplaces():
+    """
+    Get all workplaces (analysis sessions) for the authenticated user
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get user's workplaces
+        workplaces = WorkplaceModel.get_workplaces_by_user(user['id'])
+        
+        return jsonify({
+            'status': 'success',
+            'workplaces': workplaces
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Get user workplaces error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to get workplaces: {str(e)}'
+        }), 500
+
+# ✅ Get specific workplace with full data
+@api_bp.route('/workplaces/<int:workplace_id>', methods=['GET'])
+def get_workplace(workplace_id):
+    """
+    Get a specific workplace with full resume and job description data
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get workplace with full data
+        workplace = WorkplaceModel.get_workplace_by_id(workplace_id)
+        
+        if not workplace:
+            return jsonify({
+                'status': 'error',
+                'message': 'Workplace not found'
+            }), 404
+        
+        # Verify user owns this workplace
+        if workplace['user_id'] != user['id']:
+            return jsonify({
+                'status': 'error',
+                'message': 'Access denied'
+            }), 403
+        
+        return jsonify({
+            'status': 'success',
+            'workplace': workplace
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Get workplace error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to get workplace: {str(e)}'
         }), 500
 
 
