@@ -1,0 +1,22 @@
+Return ONLY this JSON structure with your analysis:
+
+{
+  "summary": "Brief overview of candidate fit for the job",
+  "skillsToImprove": [
+    {
+      "name": "React",
+      "current": 60,
+      "target": 90,
+      "urgency": "High",
+      "suggestion": "Build advanced React projects"
+    }
+  ],
+  "strengths": ["JavaScript", "Problem Solving"],
+  "recommendations": ["Take React course", "Build portfolio projects"],
+  "suggestions": ["Practice daily", "Join coding communities"],
+  "conclusion": "Overall assessment of job readiness"
+}
+
+RESUME: {resume}
+
+JOB: {job}

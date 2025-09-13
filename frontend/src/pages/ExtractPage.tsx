@@ -119,7 +119,8 @@ const ExtractPage = () => {
                     state: { 
                         workplaceId: data.workplace.id,
                         resumeData: data.resume_data,
-                        jobData: data.job_description_data
+                        jobData: data.job_description_data,
+                        gapAnalysis: data.gap_analysis
                     } 
                 });
             }, 1000);

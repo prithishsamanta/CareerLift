@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 import json
 import logging
+from datetime import datetime
 
 from utils.groq_llama_parser import parse_resume, parse_job_description
 from utils.pdf_extractor import extract_text_from_pdf
@@ -9,6 +10,7 @@ from models.resume_model import ResumeModel
 from models.job_description_model import JobDescriptionModel
 from models.ai_suggestion_model import AISuggestionModel
 from models.workplace_model import WorkplaceModel
+from langchain.agents.career_gap_agent import run_gap_analysis
 
 logger = logging.getLogger(__name__)
 
@@ -720,6 +722,46 @@ def generate_analysis():
                 'message': 'Failed to create analysis session'
             }), 500
         
+        # Prepare resume and job data for gap analysis
+        try:
+            resume_parsed_data = json.loads(latest_data['resume']['parsed_data']) if latest_data['resume']['parsed_data'] else {}
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse resume data: {e}")
+            resume_parsed_data = {'error': 'Failed to parse resume data'}
+            
+        try:
+            job_parsed_data = json.loads(latest_data['job_description']['parsed_data']) if latest_data['job_description']['parsed_data'] else {}
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse job description data: {e}")
+            job_parsed_data = {'error': 'Failed to parse job description data'}
+        
+        # Run gap analysis using the agent
+        gap_analysis_result = None
+        try:
+            logger.info(f"Starting gap analysis for user {user['id']}")
+            logger.info(f"Resume data keys: {list(resume_parsed_data.keys()) if isinstance(resume_parsed_data, dict) else 'Not a dict'}")
+            logger.info(f"Job data keys: {list(job_parsed_data.keys()) if isinstance(job_parsed_data, dict) else 'Not a dict'}")
+            
+            gap_analysis_result = run_gap_analysis(
+                resume_data=resume_parsed_data,
+                job_data=job_parsed_data,
+                user_id=user['id']
+            )
+            logger.info(f"Gap analysis completed for user {user['id']}")
+        except Exception as gap_error:
+            logger.error(f"Gap analysis failed: {gap_error}")
+            logger.error(f"Gap analysis error type: {type(gap_error)}")
+            import traceback
+            logger.error(f"Gap analysis traceback: {traceback.format_exc()}")
+            # Continue without gap analysis if it fails
+        
+        # Update workplace with analysis data if available
+        if gap_analysis_result and gap_analysis_result.get('status') == 'success':
+            WorkplaceModel.update_workplace_analysis(workplace['id'], {
+                'gap_analysis': gap_analysis_result['analysis'],
+                'analysis_timestamp': datetime.now().isoformat()
+            })
+        
         # Return workplace data with resume and job description info
         response_data = {
             'status': 'success',
@@ -728,14 +770,15 @@ def generate_analysis():
             'resume_data': {
                 'id': latest_data['resume']['id'],
                 'filename': latest_data['resume']['filename'],
-                'parsed_data': json.loads(latest_data['resume']['parsed_data']) if latest_data['resume']['parsed_data'] else None
+                'parsed_data': resume_parsed_data
             },
             'job_description_data': {
                 'id': latest_data['job_description']['id'],
                 'title': latest_data['job_description']['title'],
                 'company': latest_data['job_description']['company'],
-                'parsed_data': json.loads(latest_data['job_description']['parsed_data']) if latest_data['job_description']['parsed_data'] else None
-            }
+                'parsed_data': job_parsed_data
+            },
+            'gap_analysis': gap_analysis_result
         }
         
         return jsonify(response_data), 201
@@ -836,4 +879,34 @@ def get_workplace(workplace_id):
             'message': f'Failed to get workplace: {str(e)}'
         }), 500
 
+@api_bp.route("/ai/skill-gap", methods=["POST"])
+def skill_gap_analysis():
+    data = request.json
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({
+            'status': 'error',
+            'message': 'Authorization token required'
+        }), 401
+        
+    session_token = auth_header.split(' ')[1]
+    user = UserModel.validate_session(session_token)
+    if not user:
+        return jsonify({
+            'status': 'error',
+            'message': 'Invalid or expired session'
+        }), 401
 
+    resume = data.get("resume")
+    job = data.get("job")
+
+    if not resume or not job:
+        return jsonify({"error": "Missing resume or job data"}), 400
+
+    try:
+        result = run_gap_analysis(resume, job, user['id'])
+        print(result)
+        
+        return jsonify({"analysis": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
