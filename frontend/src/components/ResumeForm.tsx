@@ -23,6 +23,7 @@ import {
   Add,
   Edit
 } from '@mui/icons-material';
+import { apiService } from '../services/api';
 import '../styles/ResumeForm.css';
 
 interface ResumeData {
@@ -155,10 +156,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
       setUploadProgress(0);
       setUploadError(null); // Clear any previous errors
 
-      // Create FormData for file upload
-      const formData = new FormData();
-      formData.append('resume', file);
-
       try {
         // Simulate progress for better UX
         const progressInterval = setInterval(() => {
@@ -171,46 +168,38 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
           });
         }, 200);
 
-        // Make API call to backend
-        const response = await fetch('http://localhost:5001/api/resume/upload', {
-          method: 'POST',
-          body: formData,
-        });
+        // Use ApiService for authenticated upload
+        const data = await apiService.uploadResume(file);
 
         clearInterval(progressInterval);
         setUploadProgress(100);
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Backend response:', data);
+        console.log('Backend response:', data);
 
-          // Transform backend response to match ResumeData interface
-          const backendData = data.parsed_data;
-          const parsedData: ResumeData = {
-            name: '', // Extract from work experience or education if available
-            email: '', // Not extracted by backend yet
-            phone: '', // Not extracted by backend yet
-            location: '', // Not extracted by backend yet
-            summary: '', // Not extracted by backend yet
-            skills: backendData.skills || [],
-            workExperience: backendData.work_experience || [],
-            education: backendData.education || [],
-            projects: backendData.projects || []
-          };
+        // Transform backend response to match ResumeData interface
+        const backendData = data.parsed_data;
+        const parsedData: ResumeData = {
+          name: '', // Extract from work experience or education if available
+          email: '', // Not extracted by backend yet
+          phone: '', // Not extracted by backend yet
+          location: '', // Not extracted by backend yet
+          summary: '', // Not extracted by backend yet
+          skills: backendData.skills || [],
+          workExperience: backendData.work_experience || [],
+          education: backendData.education || [],
+          projects: backendData.projects || []
+        };
 
-          setFormData(parsedData);
-          setUploadError(null); // Clear any previous errors
-          setIsUploading(false);
-        } else {
-          const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
-          console.error('Upload failed:', response.statusText);
-          setUploadError(errorData.message || 'Failed to upload and parse resume');
-          setIsUploading(false);
-          setUploadProgress(0);
-        }
-      } catch (error) {
+        setFormData(parsedData);
+        setUploadError(null); // Clear any previous errors
+        setIsUploading(false);
+      } catch (error: any) {
         console.error('Error uploading file:', error);
-        setUploadError('Network error occurred while uploading file');
+        if (error.message?.includes('Authorization') || error.message?.includes('401')) {
+          setUploadError('Please log in first to upload your resume.');
+        } else {
+          setUploadError(error.message || 'Network error occurred while uploading file');
+        }
         setIsUploading(false);
         setUploadProgress(0);
       }

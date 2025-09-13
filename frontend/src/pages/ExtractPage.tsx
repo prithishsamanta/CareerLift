@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import { apiService } from '../services/api';
 import '../styles/ExtractPage.css';
 
 // Main App component containing the entire application flow
@@ -20,6 +21,10 @@ const ExtractPage = () => {
     const [isProcessingJD, setIsProcessingJD] = useState(false);
     const [jdProcessStatus, setJdProcessStatus] = useState('');
     
+    // State for analysis generation
+    const [isGeneratingAnalysis, setIsGeneratingAnalysis] = useState(false);
+    const [analysisStatus, setAnalysisStatus] = useState('');
+    
     // useRef hook with a generic type to specify the element type
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -30,29 +35,23 @@ const ExtractPage = () => {
             setUploadStatus('');
             setUploadProgress(0);
 
-            const formData = new FormData();
-            formData.append('resume', file);
-
             try {
-                const response = await fetch('http://localhost:5001/api/resume/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
+                const data = await apiService.uploadResume(file);
+                
+                setUploadProgress(100);
+                setUploadStatus('Upload successful!');
+                console.log('File uploaded:', data);
 
-                if (response.ok) {
-                    setUploadProgress(100);
-                    setUploadStatus('Upload successful!');
-                    const data = await response.json();
-                    console.log('File uploaded:', data);
-
-                    // Set complete resume data from backend response
-                    const parsedData = data.parsed_data;
-                    setResumeData(parsedData);
+                // Set complete resume data from backend response
+                const parsedData = data.parsed_data;
+                setResumeData(parsedData);
+            } catch (error: any) {
+                console.error('Upload error:', error);
+                if (error.message?.includes('Authorization') || error.message?.includes('401')) {
+                    setUploadStatus('Please log in first to upload your resume.');
                 } else {
-                    setUploadStatus('Upload failed.');
+                    setUploadStatus(`Upload failed: ${error.message || 'Unknown error'}`);
                 }
-            } catch (error) {
-                setUploadStatus('Upload failed.');
             }
         }
     };
@@ -75,32 +74,68 @@ const ExtractPage = () => {
         setJdProcessStatus('Processing job description...');
 
         try {
-            const response = await fetch('http://localhost:5001/api/job-description/parse', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    job_description: jobDescription
-                }),
+            const data = await apiService.parseJobDescription({
+                job_description: jobDescription
             });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Job description parsed:', data);
-
-                const parsedData = data.parsed_data;
-                setJobData(parsedData);
-                setJdProcessStatus('Job description processed successfully!');
-            } else {
-                const errorData = await response.json().catch(() => ({ message: 'Processing failed' }));
-                setJdProcessStatus(errorData.message || 'Failed to process job description');
-            }
-        } catch (error) {
+            
+            console.log('Job description parsed:', data);
+            const parsedData = data.parsed_data;
+            setJobData(parsedData);
+            setJdProcessStatus('Job description processed successfully!');
+        } catch (error: any) {
             console.error('Error processing job description:', error);
-            setJdProcessStatus('Failed to process job description');
+            if (error.message?.includes('Authorization') || error.message?.includes('401')) {
+                setJdProcessStatus('Please log in first to process job descriptions.');
+            } else {
+                setJdProcessStatus(error.message || 'Failed to process job description');
+            }
         } finally {
             setIsProcessingJD(false);
+        }
+    };
+    
+    // Function to handle analysis generation
+    const handleGenerateAnalysis = async () => {
+        if (!resumeData || !jobData) {
+            setAnalysisStatus('Please upload a resume and process a job description first.');
+            return;
+        }
+
+        setIsGeneratingAnalysis(true);
+        setAnalysisStatus('Generating analysis...');
+
+        try {
+            const data = await apiService.generateAnalysis({
+                name: `Analysis - ${new Date().toLocaleString()}`,
+                description: 'Generated from ExtractPage'
+            });
+            
+            console.log('Analysis generated:', data);
+            setAnalysisStatus('Analysis generated successfully!');
+            
+            // Navigate to analysis page after successful generation
+            setTimeout(() => {
+                navigate('/analysis', { 
+                    state: { 
+                        workplaceId: data.workplace.id,
+                        resumeData: data.resume_data,
+                        jobData: data.job_description_data
+                    } 
+                });
+            }, 1000);
+        } catch (error: any) {
+            console.error('Error generating analysis:', error);
+            if (error.message?.includes('Authorization') || error.message?.includes('401')) {
+                setAnalysisStatus('Please log in first to generate analysis.');
+            } else if (error.message?.includes('No resume found')) {
+                setAnalysisStatus('Please upload a resume first.');
+            } else if (error.message?.includes('No job description found')) {
+                setAnalysisStatus('Please process a job description first.');
+            } else {
+                setAnalysisStatus(`Failed to generate analysis: ${error.message || 'Unknown error'}`);
+            }
+        } finally {
+            setIsGeneratingAnalysis(false);
         }
     };
     
@@ -336,10 +371,16 @@ const ExtractPage = () => {
             <div className="analysis-button-container">
                 <button 
                     className="generate-analysis-btn"
-                    onClick={() => navigate('/analysis')}
+                    onClick={handleGenerateAnalysis}
+                    disabled={isGeneratingAnalysis}
                 >
-                    Generate Analysis
+                    {isGeneratingAnalysis ? 'Generating...' : 'Generate Analysis'}
                 </button>
+                {analysisStatus && (
+                    <div className={`status-message ${analysisStatus.includes('success') ? 'success' : 'error'}`}>
+                        {analysisStatus}
+                    </div>
+                )}
             </div>
         </div>
     );
