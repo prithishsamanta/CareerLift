@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -24,7 +24,7 @@ import {
   Edit,
   Visibility
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Chatbot, { FloatingChatButton } from '../components/Chatbot';
 import ResumeForm from '../components/ResumeForm';
 import '../styles/UploadPage.css';
@@ -44,7 +44,12 @@ interface ParsedContent {
 
 const UploadPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [chatbotOpen, setChatbotOpen] = useState(false);
+  
+  // Workspace name from HomePage navigation
+  const [workspaceName, setWorkspaceName] = useState<string>('');
+  const [workspaceDescription, setWorkspaceDescription] = useState<string>('');
   
   // Upload states
   const [resumeFile, setResumeFile] = useState<UploadedFile | null>(null);
@@ -60,6 +65,14 @@ const UploadPage: React.FC = () => {
   const [showResumeForm, setShowResumeForm] = useState(false);
   const [showJobForm, setShowJobForm] = useState(false);
   const [resumeFormOpen, setResumeFormOpen] = useState(false);
+
+  // Get workspace name from navigation state
+  useEffect(() => {
+    if (location.state) {
+      setWorkspaceName(location.state.workspaceName || '');
+      setWorkspaceDescription(location.state.workspaceDescription || '');
+    }
+  }, [location.state]);
 
   // Mock parsed data for demonstration
   const mockResumeData: ParsedContent = {
@@ -139,7 +152,12 @@ const UploadPage: React.FC = () => {
 
   const handleAnalyze = () => {
     if (resumeParsed && jobDescParsed) {
-      navigate('/analysis');
+      navigate('/analysis', {
+        state: {
+          workspaceName: workspaceName,
+          workspaceDescription: workspaceDescription
+        }
+      });
     }
   };
 

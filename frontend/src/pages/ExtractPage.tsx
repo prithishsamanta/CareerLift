@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import { apiService } from '../services/api';
 import '../styles/ExtractPage.css';
@@ -7,6 +7,13 @@ import '../styles/ExtractPage.css';
 // Main App component containing the entire application flow
 const ExtractPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    // Workspace name from navigation state
+    const [workspaceName, setWorkspaceName] = useState<string>('');
+    const [workspaceDescription, setWorkspaceDescription] = useState<string>('');
+    const [isTemporary, setIsTemporary] = useState<boolean>(false);
+    const [tempWorkspaceId, setTempWorkspaceId] = useState<number | null>(null);
     
     // State to manage the file upload progress and status
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -27,6 +34,16 @@ const ExtractPage = () => {
     
     // useRef hook with a generic type to specify the element type
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Get workspace name from navigation state
+    useEffect(() => {
+        if (location.state) {
+            setWorkspaceName(location.state.workspaceName || '');
+            setWorkspaceDescription(location.state.workspaceDescription || '');
+            setIsTemporary(location.state.isTemporary || false);
+            setTempWorkspaceId(location.state.tempWorkspaceId || null);
+        }
+    }, [location.state]);
 
     // Function to handle the file selection and upload simulation
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,12 +123,25 @@ const ExtractPage = () => {
 
         try {
             const data = await apiService.generateAnalysis({
-                name: `Analysis - ${new Date().toLocaleString()}`,
-                description: 'Generated from ExtractPage'
+                name: workspaceName || `Analysis - ${new Date().toLocaleString()}`,
+                description: workspaceDescription || 'Generated from ExtractPage'
             });
             
-            console.log('Analysis generated:', data);
             setAnalysisStatus('Analysis generated successfully!');
+            
+            // Clean up temporary workspace if this was a temporary workspace
+            if (isTemporary && tempWorkspaceId) {
+                const savedWorkspaces = localStorage.getItem('tempWorkspaces');
+                if (savedWorkspaces) {
+                    try {
+                        const tempWorkspaces = JSON.parse(savedWorkspaces);
+                        const updatedTempWorkspaces = tempWorkspaces.filter((w: any) => w.id !== tempWorkspaceId);
+                        localStorage.setItem('tempWorkspaces', JSON.stringify(updatedTempWorkspaces));
+                    } catch (error) {
+                        console.error('Error cleaning up temporary workspace:', error);
+                    }
+                }
+            }
             
             // Navigate to analysis page after successful generation
             setTimeout(() => {
@@ -313,20 +343,16 @@ const ExtractPage = () => {
 
                         <div className="button-group">
                             <button 
-                                className="process-button"
+                                className={`process-button ${jdProcessStatus && !jdProcessStatus.includes('success') && !isProcessingJD ? 'error-state' : ''}`}
                                 onClick={handleProcessJobDescription}
                                 disabled={isProcessingJD || !jobDescription.trim()}
                             >
-                                {isProcessingJD ? 'Processing...' : 'Process Job Description'}
+                                {isProcessingJD ? 'Processing...' : 
+                                 jdProcessStatus && !jdProcessStatus.includes('success') && !isProcessingJD ? jdProcessStatus :
+                                 jdProcessStatus && jdProcessStatus.includes('success') ? '✓ Job Description Processed' :
+                                 'Process Job Description'}
                             </button>
                         </div>
-
-                        {/* Processing Status */}
-                        {jdProcessStatus && (
-                            <p className="upload-status">
-                                {jdProcessStatus}
-                            </p>
-                        )}
 
                         {/* Job Description Data Display */}
                         {jobData && (
@@ -371,17 +397,14 @@ const ExtractPage = () => {
             {/* Generate Analysis Button */}
             <div className="analysis-button-container">
                 <button 
-                    className="generate-analysis-btn"
+                    className={`generate-analysis-btn ${analysisStatus && !analysisStatus.includes('success') && !isGeneratingAnalysis ? 'error-state' : ''}`}
                     onClick={handleGenerateAnalysis}
                     disabled={isGeneratingAnalysis}
                 >
-                    {isGeneratingAnalysis ? 'Generating...' : 'Generate Analysis'}
+                    {isGeneratingAnalysis ? 'Generating...' : 
+                     analysisStatus && !analysisStatus.includes('success') && !isGeneratingAnalysis ? analysisStatus : 
+                     'Generate Analysis'}
                 </button>
-                {analysisStatus && (
-                    <div className={`status-message ${analysisStatus.includes('success') ? 'success' : 'error'}`}>
-                        {analysisStatus}
-                    </div>
-                )}
             </div>
         </div>
     );

@@ -30,15 +30,23 @@ const AnalysisPage: React.FC = () => {
   const location = useLocation();
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [analysisData, setAnalysisData] = useState<any>(null);
+  const [workspace, setWorkspace] = useState<any>(null);
 
-  // Extract analysis data from navigation state
+  // Extract analysis data and workspace from navigation state
   useEffect(() => {
-    if (location.state && location.state.gapAnalysis) {
-      const gapAnalysis = location.state.gapAnalysis;
-      console.log('Received gap analysis data:', gapAnalysis);
+    if (location.state) {
+      // Check for workspace data (from HomePage)
+      if (location.state.workspace) {
+        setWorkspace(location.state.workspace);
+      }
       
-      if (gapAnalysis.status === 'success' && gapAnalysis.analysis) {
-        setAnalysisData(gapAnalysis.analysis);
+      // Check for analysis data (from ExtractPage)
+      if (location.state.gapAnalysis) {
+        const gapAnalysis = location.state.gapAnalysis;
+        
+        if (gapAnalysis.status === 'success' && gapAnalysis.analysis) {
+          setAnalysisData(gapAnalysis.analysis);
+        }
       }
     }
   }, [location.state]);
@@ -71,11 +79,19 @@ const AnalysisPage: React.FC = () => {
   const currentAnalysis = analysisData || mockAnalysis;
 
   const handleBackClick = () => {
-    navigate('/upload');
+    navigate('/home');
   };
 
   const handleEditForm = () => {
-    navigate('/upload');
+    // Navigate to upload page with workspace context
+    navigate('/upload', { 
+      state: { 
+        workspaceName: workspace?.name || '',
+        workspaceDescription: workspace?.description || '',
+        isTemporary: location.state?.isTemporary || false,
+        tempWorkspaceId: location.state?.tempWorkspaceId || null
+      } 
+    });
   };
 
   const handleChatbot = () => {
@@ -101,17 +117,259 @@ const AnalysisPage: React.FC = () => {
       <Header />
 
       <Container maxWidth="lg" className="main-content">
-        <Box display="flex" gap={4} flexDirection={{ xs: 'column', lg: 'row' }}>
-          {/* Main Analysis Section */}
-          <Box flex="1" maxWidth={{ lg: '66%' }}>
-            <Paper className="analysis-card" elevation={3}>
-              <CardContent sx={{ p: 4 }}>
-                <Box display="flex" alignItems="center" mb={3} sx={{ background: 'transparent' }}>
-                  <TrendingUp sx={{ mr: 2, color: '#6b7280' }} />
-                  <Typography variant="h4" className="section-title" sx={{ background: 'transparent' }}>
-                    Your Skill Analysis
+        {/* Show workspace info if available */}
+        {workspace && (
+          <Box mb={3}>
+            <Typography variant="h4" className="section-title" sx={{ background: 'transparent' }}>
+              {workspace.name}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {workspace.description}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Show upload prompt if no analysis data */}
+        {!analysisData && (
+          <Box sx={{ mb: 4 }}>
+            {/* Welcome Section */}
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                mb: 3,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                borderRadius: 3,
+                overflow: 'hidden'
+              }}
+            >
+              <CardContent sx={{ p: 6, textAlign: 'center', position: 'relative' }}>
+                {/* Background Pattern */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+                    opacity: 0.3
+                  }}
+                />
+                
+                <Box sx={{ position: 'relative', zIndex: 1 }}>
+                  <Box display="flex" alignItems="center" justifyContent="center" mb={3}>
+                    <Box
+                      sx={{
+                        p: 2,
+                        borderRadius: '50%',
+                        background: 'rgba(255, 255, 255, 0.2)',
+                        backdropFilter: 'blur(10px)',
+                        mr: 2
+                      }}
+                    >
+                      <Work sx={{ fontSize: 48, color: 'white' }} />
+                    </Box>
+                    <Typography 
+                      variant="h3" 
+                      sx={{ 
+                        fontWeight: 700,
+                        textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      Welcome to Your Workspace
+                    </Typography>
+                  </Box>
+                  
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      mb: 2,
+                      opacity: 0.9,
+                      fontWeight: 400
+                    }}
+                  >
+                    Ready to unlock your potential?
+                  </Typography>
+                  
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      maxWidth: '600px',
+                      mx: 'auto',
+                      opacity: 0.8,
+                      lineHeight: 1.6
+                    }}
+                  >
+                    Upload your resume and job description to get started with your personalized skill gap analysis. 
+                    We'll help you identify areas for improvement and create a tailored development plan.
                   </Typography>
                 </Box>
+              </CardContent>
+            </Paper>
+
+            {/* Action Cards */}
+            <Box display="flex" gap={3} flexDirection={{ xs: 'column', md: 'row' }}>
+              {/* Upload Card */}
+              <Paper 
+                elevation={3} 
+                sx={{ 
+                  flex: 1,
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 12px 24px rgba(0,0,0,0.15)'
+                  }
+                }}
+              >
+                <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                  <Box
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 3
+                    }}
+                  >
+                    <Edit sx={{ fontSize: 32, color: 'white' }} />
+                  </Box>
+                  
+                  <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
+                    Start Your Analysis
+                  </Typography>
+                  
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
+                    Upload your resume and job description to begin your personalized skill gap analysis
+                  </Typography>
+                  
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={handleEditForm}
+                    startIcon={<Edit />}
+                    sx={{ 
+                      px: 4, 
+                      py: 1.5,
+                      background: 'linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #2c5aa0 0%, #2a4d8d 100%)',
+                        transform: 'translateY(-2px)'
+                      }
+                    }}
+                  >
+                    Upload Documents
+                  </Button>
+                </CardContent>
+              </Paper>
+
+              {/* Info Card */}
+              <Paper 
+                elevation={3} 
+                sx={{ 
+                  flex: 1,
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
+                }}
+              >
+                <CardContent sx={{ p: 4 }}>
+                  <Box display="flex" alignItems="center" mb={3}>
+                    <Box
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2
+                      }}
+                    >
+                      <Psychology sx={{ fontSize: 24, color: 'white' }} />
+                    </Box>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      What You'll Get
+                    </Typography>
+                  </Box>
+                  
+                  <Box component="ul" sx={{ pl: 0, listStyle: 'none' }}>
+                    {[
+                      'Personalized skill gap analysis',
+                      'Targeted improvement recommendations',
+                      'Custom learning roadmap',
+                      'Progress tracking tools'
+                    ].map((item, index) => (
+                      <Box 
+                        key={index}
+                        component="li"
+                        sx={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          mb: 1.5,
+                          '&::before': {
+                            content: '"✓"',
+                            color: '#10b981',
+                            fontWeight: 'bold',
+                            mr: 1.5,
+                            fontSize: '1.2rem'
+                          }
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          {item}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Paper>
+            </Box>
+
+            {/* Back Button */}
+            <Box display="flex" justifyContent="center" mt={4}>
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={handleBackClick}
+                sx={{ 
+                  px: 4, 
+                  py: 1.5,
+                  borderColor: '#e2e8f0',
+                  color: '#6b7280',
+                  '&:hover': {
+                    borderColor: '#3182ce',
+                    color: '#3182ce',
+                    backgroundColor: 'rgba(49, 130, 206, 0.04)'
+                  }
+                }}
+              >
+                Back to Workspaces
+              </Button>
+            </Box>
+          </Box>
+        )}
+
+        {/* Show analysis data if available */}
+        {analysisData && (
+          <Box display="flex" gap={4} flexDirection={{ xs: 'column', lg: 'row' }}>
+            {/* Main Analysis Section */}
+            <Box flex="1" maxWidth={{ lg: '66%' }}>
+              <Paper className="analysis-card" elevation={3}>
+                <CardContent sx={{ p: 4 }}>
+                  <Box display="flex" alignItems="center" mb={3} sx={{ background: 'transparent' }}>
+                    <TrendingUp sx={{ mr: 2, color: '#6b7280' }} />
+                    <Typography variant="h4" className="section-title" sx={{ background: 'transparent' }}>
+                      Your Skill Analysis
+                    </Typography>
+                  </Box>
                 
                 <Typography variant="body1" className="analysis-description" paragraph>
                   {currentAnalysis.summary}
@@ -283,6 +541,7 @@ const AnalysisPage: React.FC = () => {
             </Box>
           </Box>
         </Box>
+        )}
       </Container>
 
       {/* Chatbot */}
