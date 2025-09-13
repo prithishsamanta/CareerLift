@@ -1,0 +1,38 @@
+IMPORTANT: You must respond ONLY with valid JSON. Do not include any text before or after the JSON.
+
+Analyze the resume and job description data provided below and return ONLY a JSON object with the following structure:
+
+{
+  "summary": "Brief overview of the candidate's fit for the job. Include key highlights about alignment and areas for improvement (2-3 sentences).",
+  "skillsToImprove": [
+    {
+      "name": "Skill Name",
+      "current": 40,
+      "target": 80,
+      "urgency": "High",
+      "suggestion": "A short, specific suggestion on how to improve this skill"
+    }
+  ],
+  "strengths": [
+    "Skill 1",
+    "Skill 2",
+    "Skill 3"
+  ],
+  "recommendations": [
+    "Clear, actionable steps the user should take next",
+    "Include specific resources or actions"
+  ],
+  "suggestions": [
+    "General improvement advice",
+    "Study routines or project ideas"
+  ],
+  "conclusion": "A holistic final paragraph reflecting on the user's job-readiness"
+}
+
+Resume Data:
+{resume}
+
+Job Description:
+{job}
+
+Remember: Respond ONLY with the JSON object above, filled with your analysis. No additional text.

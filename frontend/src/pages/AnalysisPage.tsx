@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -20,22 +20,37 @@ import {
   School,
   Work
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Chatbot from '../components/Chatbot';
 import '../styles/AnalysisPage.css';
 
 const AnalysisPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [analysisData, setAnalysisData] = useState<any>(null);
 
-  // Mock data for demonstration
+  // Extract analysis data from navigation state
+  useEffect(() => {
+    if (location.state && location.state.gapAnalysis) {
+      const gapAnalysis = location.state.gapAnalysis;
+      console.log('Received gap analysis data:', gapAnalysis);
+      
+      if (gapAnalysis.status === 'success' && gapAnalysis.analysis) {
+        setAnalysisData(gapAnalysis.analysis);
+      }
+    }
+  }, [location.state]);
+
+  // Fallback mock data if no real data is available
   const mockAnalysis = {
-    skillGaps: [
-      { skill: 'React.js', currentLevel: 60, requiredLevel: 90, priority: 'High' },
-      { skill: 'Node.js', currentLevel: 40, requiredLevel: 80, priority: 'High' },
-      { skill: 'AWS', currentLevel: 20, requiredLevel: 70, priority: 'Medium' },
-      { skill: 'TypeScript', currentLevel: 70, requiredLevel: 85, priority: 'Low' }
+    summary: "Based on your resume and the target job description, we've identified key areas where you can improve to bridge the gap between your current skills and the requirements for your dream job.",
+    skillsToImprove: [
+      { name: 'React.js', current: 60, target: 90, urgency: 'High', suggestion: 'Focus on advanced React patterns and hooks' },
+      { name: 'Node.js', current: 40, target: 80, urgency: 'High', suggestion: 'Build full-stack projects with Node.js' },
+      { name: 'AWS', current: 20, target: 70, urgency: 'Medium', suggestion: 'Get AWS certification for cloud skills' },
+      { name: 'TypeScript', current: 70, target: 85, urgency: 'Low', suggestion: 'Practice TypeScript in real projects' }
     ],
     strengths: ['JavaScript', 'HTML/CSS', 'Git', 'Problem Solving'],
     recommendations: [
@@ -43,8 +58,17 @@ const AnalysisPage: React.FC = () => {
       'Build full-stack projects with Node.js',
       'Get AWS certification for cloud skills',
       'Practice TypeScript in real projects'
-    ]
+    ],
+    suggestions: [
+      'Set up a daily coding routine',
+      'Build projects that showcase your skills',
+      'Join developer communities for networking'
+    ],
+    conclusion: "You have a solid foundation in web development. Focus on strengthening your React and Node.js skills to be fully ready for senior developer positions."
   };
+
+  // Use real data if available, otherwise use mock data
+  const currentAnalysis = analysisData || mockAnalysis;
 
   const handleBackClick = () => {
     navigate('/upload');
@@ -62,8 +86,8 @@ const AnalysisPage: React.FC = () => {
     navigate('/tracker');
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
+  const getUrgencyColor = (urgency: string) => {
+    switch (urgency) {
       case 'High': return 'error';
       case 'Medium': return 'warning';
       case 'Low': return 'info';
@@ -90,9 +114,7 @@ const AnalysisPage: React.FC = () => {
                 </Box>
                 
                 <Typography variant="body1" className="analysis-description" paragraph>
-                  Based on your resume and the target job description, we've identified key areas 
-                  where you can improve to bridge the gap between your current skills and the 
-                  requirements for your dream job.
+                  {currentAnalysis.summary}
                 </Typography>
 
                 <Divider sx={{ my: 3 }} />
@@ -103,29 +125,34 @@ const AnalysisPage: React.FC = () => {
                   Skills to Improve
                 </Typography>
                 
-                {mockAnalysis.skillGaps.map((gap, index) => (
+                {currentAnalysis.skillsToImprove && currentAnalysis.skillsToImprove.map((skill: any, index: number) => (
                   <Box key={index} className="skill-gap-item" mb={3}>
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                      <Typography variant="h6">{gap.skill}</Typography>
+                      <Typography variant="h6">{skill.name}</Typography>
                       <Chip 
-                        label={gap.priority} 
-                        color={getPriorityColor(gap.priority) as any}
+                        label={skill.urgency} 
+                        color={getUrgencyColor(skill.urgency) as any}
                         size="small"
                       />
                     </Box>
-                    <Box display="flex" alignItems="center" gap={2}>
+                    <Box display="flex" alignItems="center" gap={2} mb={1}>
                       <Typography variant="body2" sx={{ minWidth: '100px' }}>
-                        Current: {gap.currentLevel}%
+                        Current: {skill.current}%
                       </Typography>
                       <LinearProgress 
                         variant="determinate" 
-                        value={gap.currentLevel}
+                        value={skill.current}
                         sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
                       />
                       <Typography variant="body2" sx={{ minWidth: '100px' }}>
-                        Target: {gap.requiredLevel}%
+                        Target: {skill.target}%
                       </Typography>
                     </Box>
+                    {skill.suggestion && (
+                      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                        💡 {skill.suggestion}
+                      </Typography>
+                    )}
                   </Box>
                 ))}
 
@@ -137,7 +164,7 @@ const AnalysisPage: React.FC = () => {
                   Your Strengths
                 </Typography>
                 <Box display="flex" flexWrap="wrap" gap={1} mb={3}>
-                  {mockAnalysis.strengths.map((strength, index) => (
+                  {currentAnalysis.strengths && currentAnalysis.strengths.map((strength: string, index: number) => (
                     <Chip 
                       key={index} 
                       label={strength} 
@@ -153,13 +180,49 @@ const AnalysisPage: React.FC = () => {
                 <Typography variant="h5" className="subsection-title" gutterBottom>
                   💡 Recommendations
                 </Typography>
-                <Box>
-                  {mockAnalysis.recommendations.map((rec, index) => (
-                    <Typography key={index} variant="body1" className="recommendation-item">
+                <Box mb={3}>
+                  {currentAnalysis.recommendations && currentAnalysis.recommendations.map((rec: string, index: number) => (
+                    <Typography key={index} variant="body1" className="recommendation-item" paragraph>
                       • {rec}
                     </Typography>
                   ))}
                 </Box>
+
+                {/* Suggestions */}
+                {currentAnalysis.suggestions && currentAnalysis.suggestions.length > 0 && (
+                  <>
+                    <Divider sx={{ my: 3 }} />
+                    <Typography variant="h5" className="subsection-title" gutterBottom>
+                      🌟 Additional Suggestions
+                    </Typography>
+                    <Box mb={3}>
+                      {currentAnalysis.suggestions.map((suggestion: string, index: number) => (
+                        <Typography key={index} variant="body1" className="recommendation-item" paragraph>
+                          • {suggestion}
+                        </Typography>
+                      ))}
+                    </Box>
+                  </>
+                )}
+
+                {/* Conclusion */}
+                {currentAnalysis.conclusion && (
+                  <>
+                    <Divider sx={{ my: 3 }} />
+                    <Typography variant="h5" className="subsection-title" gutterBottom>
+                      🎯 Conclusion
+                    </Typography>
+                    <Typography variant="body1" className="conclusion-text" paragraph sx={{ 
+                      fontStyle: 'italic', 
+                      backgroundColor: '#f8f9fa', 
+                      padding: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #3182ce'
+                    }}>
+                      {currentAnalysis.conclusion}
+                    </Typography>
+                  </>
+                )}
               </CardContent>
             </Paper>
           </Box>
