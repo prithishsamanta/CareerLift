@@ -11,6 +11,7 @@ from models.job_description_model import JobDescriptionModel
 from models.ai_suggestion_model import AISuggestionModel
 from models.workplace_model import WorkplaceModel
 from langchain.agents.career_gap_agent import run_gap_analysis
+from langchain.agents.roadmap_agent import create_study_plan
 
 logger = logging.getLogger(__name__)
 
@@ -910,3 +911,48 @@ def skill_gap_analysis():
         return jsonify({"analysis": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/create-roadmap', methods=['POST'])
+def create_roadmap():
+    try:
+        # Get input data from request
+        # data = request.get_json()
+
+        # auth_header = request.headers.get('Authorization')
+        # if not auth_header or not auth_header.startswith('Bearer '):
+        #     return jsonify({
+        #         'status': 'error',
+        #         'message': 'Authorization token required'
+        #     }), 401
+            
+        # session_token = auth_header.split(' ')[1]
+        # user = UserModel.validate_session(session_token)
+        # if not user:
+        #     return jsonify({
+        #         'status': 'error',
+        #         'message': 'Invalid or expired session'
+        #     }), 401
+        
+        # Create the study plan using the roadmap agent
+        try:
+        # ... your code that calls create_study_plan() ...
+            study_plan = create_study_plan()
+        except Exception as e:
+            # This is likely what you have now:
+            logger.error(f"Error creating roadmap: {e}")
+            
+            # Temporarily add this line to re-raise the error:
+            raise # <-- This will give you the full traceback
+        
+        return jsonify({
+            'status': 'success',
+            'data': study_plan
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error creating roadmap: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Failed to create roadmap',
+            'error': str(e)
+        }), 500

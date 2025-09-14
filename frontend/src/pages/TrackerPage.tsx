@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -23,7 +23,8 @@ import {
   TrendingUp,
   Assignment,
   NavigateBefore,
-  NavigateNext
+  NavigateNext,
+  Refresh
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
@@ -35,6 +36,7 @@ const TrackerPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [studyPlan, setStudyPlan] = useState<any>(null);
 
   // Mock data for daily tasks based on analysis
   const mockDailyTasks: { [key: string]: Array<{ id: number; task: string; skill: string; completed: boolean; priority: string }> } = {
@@ -58,6 +60,37 @@ const TrackerPage: React.FC = () => {
     'AWS': { completed: 0, total: 4, percentage: 0 },
     'TypeScript': { completed: 0, total: 2, percentage: 0 },
   };
+
+    const fetchRoadmap = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/create-roadmap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch roadmap');
+      }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        setStudyPlan(data.data);
+        console.log("Fetched Study Plan:", data.data);
+        // You can update your mockDailyTasks here with the new study plan
+        // or create a new visualization for the roadmap
+      }
+    } catch (error) {
+      console.error('Error fetching roadmap:', error);
+      // Handle error (maybe show a notification)
+    }
+  };
+
+  // Add this useEffect to fetch the roadmap when the component mounts
+  useEffect(() => {
+    fetchRoadmap();
+  }, []);  
 
   const handleBackClick = () => {
     navigate('/analysis');
