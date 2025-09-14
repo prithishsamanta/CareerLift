@@ -19,11 +19,12 @@ import {
 } from "@mui/material";
 import {
   Add,
-  Work,
+  FolderOpen,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Header from '../components/Header';
 import { apiService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import "../styles/HomePage.css";
 
 interface Workspace {
@@ -39,9 +40,11 @@ interface Workspace {
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
+  const [workspaceNameError, setWorkspaceNameError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -96,35 +99,69 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleCreateWorkspace = async () => {
-    if (newWorkspaceName.trim()) {
-      try {
-        // Create a temporary workspace object and add it to the list
-        const newWorkspace: Workspace = {
-          id: Date.now(), // Temporary ID
-          name: newWorkspaceName.trim(),
-          description: `Workspace for ${newWorkspaceName.trim()}`,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
+  const validateWorkspaceName = (name: string): string | null => {
+    const trimmedName = name.trim();
+    
+    if (!trimmedName) {
+      return "Workspace name is required";
+    }
+    
+    if (trimmedName.length > 12) {
+      return "Workspace name must be 12 characters or less";
+    }
+    
+    return null;
+  };
 
-        // Add to the list immediately for better UX
-        const updatedWorkspaces = [newWorkspace, ...workspaces];
-        setWorkspaces(updatedWorkspaces);
-        
-        // Save to localStorage for persistence
-        const tempWorkspaces = updatedWorkspaces.filter(w => typeof w.id === 'number' && w.id > 1000000000000);
-        localStorage.setItem('tempWorkspaces', JSON.stringify(tempWorkspaces));
-        
-        setNewWorkspaceName("");
-        setCreateDialogOpen(false);
-        
-        // The actual workspace will be created in the database when analysis is generated
-        // For now, we just show it in the UI
-      } catch (error: any) {
-        console.error('Error creating workspace:', error);
-        setError(error.message || 'Failed to create workspace');
-      }
+  const handleWorkspaceNameChange = (value: string) => {
+    setNewWorkspaceName(value);
+    
+    // Clear error when user starts typing
+    if (workspaceNameError) {
+      setWorkspaceNameError(null);
+    }
+    
+    // Validate on change for immediate feedback
+    if (value.trim().length > 12) {
+      setWorkspaceNameError("Workspace name must be 12 characters or less");
+    }
+  };
+
+  const handleCreateWorkspace = async () => {
+    const validationError = validateWorkspaceName(newWorkspaceName);
+    
+    if (validationError) {
+      setWorkspaceNameError(validationError);
+      return;
+    }
+
+    try {
+      // Create a temporary workspace object and add it to the list
+      const newWorkspace: Workspace = {
+        id: Date.now(), // Temporary ID
+        name: newWorkspaceName.trim(),
+        description: `Workspace for ${newWorkspaceName.trim()}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      // Add to the list immediately for better UX
+      const updatedWorkspaces = [newWorkspace, ...workspaces];
+      setWorkspaces(updatedWorkspaces);
+      
+      // Save to localStorage for persistence
+      const tempWorkspaces = updatedWorkspaces.filter(w => typeof w.id === 'number' && w.id > 1000000000000);
+      localStorage.setItem('tempWorkspaces', JSON.stringify(tempWorkspaces));
+      
+      setNewWorkspaceName("");
+      setWorkspaceNameError(null);
+      setCreateDialogOpen(false);
+      
+      // The actual workspace will be created in the database when analysis is generated
+      // For now, we just show it in the UI
+    } catch (error: any) {
+      console.error('Error creating workspace:', error);
+      setError(error.message || 'Failed to create workspace');
     }
   };
 
@@ -162,13 +199,69 @@ const HomePage: React.FC = () => {
     });
   };
 
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      });
+    } else if (diffDays === 1) {
+      return "Yesterday";
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined
+      });
+    }
+  };
+
   return (
     <Box className="home-page">
       {/* Use consistent Header component */}
       <Header />
 
+      {/* Welcome Message */}
+      <Container maxWidth="lg" sx={{ pt: 4, pb: 2, px: { xs: 2, sm: 3 } }}>
+        <Box className="welcome-section" sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography 
+            variant="h4" 
+            component="h1"
+            sx={{ 
+              fontWeight: 700,
+              color: '#1f2937',
+              mb: 2,
+              fontSize: { xs: '1.75rem', sm: '2.125rem' }
+            }}
+          >
+            Hi {user?.firstName || 'User'}, Welcome to CareerLift
+          </Typography>
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              color: '#4b5563',
+              fontSize: '1.125rem',
+              lineHeight: 1.6,
+              maxWidth: '800px',
+              mx: 'auto'
+            }}
+          >
+            CareerLift helps you bridge the gap between where you are and where you want to be, 
+            by analyzing your resume and target job description using cutting-edge AI
+          </Typography>
+        </Box>
+      </Container>
+
       {/* Main Content */}
-      <Container maxWidth="lg" className="main-content">
+      <Container maxWidth="lg" className="main-content" sx={{ px: { xs: 2, sm: 3 } }}>
         <Box className="workspaces-container">
           {/* Error Display */}
           {error && (
@@ -184,7 +277,7 @@ const HomePage: React.FC = () => {
               <CircularProgress />
             </Box>
           ) : (
-            <Box className="workspaces-grid">
+            <Box className="workspaces-grid" sx={{ width: '100%' }}>
               {/* Existing Workspaces */}
               {workspaces.map((workspace) => (
                 <Box key={workspace.id} className="workspace-grid-item">
@@ -204,42 +297,69 @@ const HomePage: React.FC = () => {
                     <CardContent 
                       className="workspace-content"
                       sx={{ 
-                        p: 4,
+                        p: 2.5,
                         textAlign: 'center',
                         display: 'flex',
                         flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        minHeight: '120px'
+                        justifyContent: 'flex-start',
+                        height: '100%',
+                        minHeight: 'auto'
                       }}
                     >
                       <Box
                         sx={{
-                          width: 60,
-                          height: 60,
-                          borderRadius: '50%',
+                          width: 48,
+                          height: 48,
+                          borderRadius: '12px',
                           background: 'linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          mb: 2
+                          mx: 'auto',
+                          mb: 1.5
                         }}
                       >
-                        <Work sx={{ fontSize: 28, color: 'white' }} />
+                        <FolderOpen sx={{ fontSize: 24, color: 'white' }} />
                       </Box>
                       
                       <Typography 
                         variant="h6" 
                         className="workspace-name"
                         sx={{ 
-                          fontWeight: 600,
+                          fontWeight: 700,
                           color: '#1f2937',
-                          textAlign: 'center',
-                          lineHeight: 1.3
+                          fontSize: '1rem',
+                          lineHeight: 1.3,
+                          mb: 1.5,
+                          wordBreak: 'break-word'
                         }}
                       >
                         {workspace.name}
                       </Typography>
+                      
+                      <Box className="workspace-timestamps">
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            color: '#6b7280',
+                            fontSize: '0.75rem',
+                            lineHeight: 1.2,
+                            mb: 0.25
+                          }}
+                        >
+                          Updated: {formatDateTime(workspace.updated_at)}
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            color: '#9ca3af',
+                            fontSize: '0.75rem',
+                            lineHeight: 1.2
+                          }}
+                        >
+                          Created: {formatDateTime(workspace.created_at)}
+                        </Typography>
+                      </Box>
                     </CardContent>
                   </Card>
                 </Box>
@@ -254,52 +374,54 @@ const HomePage: React.FC = () => {
                   sx={{
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
-                    border: '2px dashed #cbd5e0',
-                    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                    border: '1px dashed #cbd5e0',
+                    background: '#ffffff',
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
                       borderColor: '#3182ce',
-                      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)'
+                      borderStyle: 'solid'
                     }
                   }}
                 >
                   <CardContent 
                     className="create-workspace-content"
                     sx={{ 
-                      p: 4,
+                      p: 2.5,
                       textAlign: 'center',
                       display: 'flex',
                       flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      minHeight: '120px'
+                      justifyContent: 'flex-start',
+                      height: '100%',
+                      minHeight: 'auto'
                     }}
                   >
                     <Box
                       sx={{
-                        width: 60,
-                        height: 60,
-                        borderRadius: '50%',
+                        width: 48,
+                        height: 48,
+                        borderRadius: '12px',
                         background: 'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        mb: 2
+                        mx: 'auto',
+                        mb: 1.5
                       }}
                     >
-                      <Add sx={{ fontSize: 28, color: 'white' }} />
+                      <Add sx={{ fontSize: 24, color: 'white' }} />
                     </Box>
                     
                     <Typography 
                       variant="h6" 
                       className="create-workspace-text"
                       sx={{ 
-                        fontWeight: 600,
+                        fontWeight: 700,
                         color: '#1f2937',
-                        textAlign: 'center',
+                        fontSize: '1rem',
                         lineHeight: 1.3,
-                        mb: 1
+                        mb: 1.5,
+                        textAlign: 'center'
                       }}
                     >
                       Create New Workspace
@@ -309,9 +431,11 @@ const HomePage: React.FC = () => {
                       variant="body2" 
                       color="text.secondary" 
                       sx={{ 
-                        fontSize: '0.875rem', 
-                        lineHeight: 1.4,
-                        textAlign: 'center'
+                        fontSize: '0.75rem', 
+                        lineHeight: 1.3,
+                        color: '#6b7280',
+                        textAlign: 'center',
+                        mt: 0.5
                       }}
                     >
                       Start a new skill development journey
@@ -327,13 +451,17 @@ const HomePage: React.FC = () => {
       {/* Create Workspace Dialog */}
       <Dialog
         open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
+        onClose={() => {
+          setCreateDialogOpen(false);
+          setWorkspaceNameError(null);
+          setNewWorkspaceName("");
+        }}
         maxWidth="sm"
         fullWidth
         className="create-workspace-dialog"
       >
         <DialogTitle className="dialog-title">
-          <Work sx={{ mr: 1, color: "primary.main" }} />
+          <FolderOpen sx={{ mr: 1, color: "primary.main" }} />
           Create New Workspace
         </DialogTitle>
 
@@ -350,8 +478,11 @@ const HomePage: React.FC = () => {
             fullWidth
             variant="outlined"
             value={newWorkspaceName}
-            onChange={(e) => setNewWorkspaceName(e.target.value)}
-            placeholder="e.g., Frontend Development, Data Science, Product Management"
+            onChange={(e) => handleWorkspaceNameChange(e.target.value)}
+            placeholder="e.g., Frontend Dev, Data Science"
+            error={!!workspaceNameError}
+            helperText={workspaceNameError || `${newWorkspaceName.length}/12 characters`}
+            inputProps={{ maxLength: 15 }} // Allow a bit more to show validation error
             onKeyPress={(e) => {
               if (e.key === "Enter") {
                 handleCreateWorkspace();
@@ -362,7 +493,11 @@ const HomePage: React.FC = () => {
 
         <DialogActions className="dialog-actions">
           <Button
-            onClick={() => setCreateDialogOpen(false)}
+            onClick={() => {
+              setCreateDialogOpen(false);
+              setWorkspaceNameError(null);
+              setNewWorkspaceName("");
+            }}
             className="cancel-button"
           >
             Cancel
@@ -371,7 +506,7 @@ const HomePage: React.FC = () => {
             onClick={handleCreateWorkspace}
             variant="contained"
             className="create-button"
-            disabled={!newWorkspaceName.trim()}
+            disabled={!newWorkspaceName.trim() || !!workspaceNameError}
           >
             Create Workspace
           </Button>

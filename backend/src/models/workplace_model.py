@@ -108,7 +108,7 @@ class WorkplaceModel:
     
     @staticmethod
     def get_workplaces_by_user(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
-        """Get all workplaces for a user, ordered by creation date (newest first)"""
+        """Get all workplaces for a user, ordered by last updated date (newest first)"""
         try:
             with db_config.get_connection() as conn:
                 with conn.cursor(pymysql.cursors.DictCursor) as cursor:
@@ -122,7 +122,7 @@ class WorkplaceModel:
                     LEFT JOIN resumes r ON w.resume_id = r.id
                     LEFT JOIN job_descriptions jd ON w.job_description_id = jd.id
                     WHERE w.user_id = %s
-                    ORDER BY w.created_at DESC
+                    ORDER BY w.updated_at DESC, w.created_at DESC
                     LIMIT %s
                     """
                     

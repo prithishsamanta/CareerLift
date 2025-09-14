@@ -3,7 +3,7 @@ IMPORTANT: You must respond ONLY with valid JSON. Do not include any text before
 Analyze the resume and job description data provided below and return ONLY a JSON object with the following structure:
 
 {
-  "summary": "Brief overview of the candidate's fit for the job. Include key highlights about alignment and areas for improvement (2-3 sentences).",
+  "summary": "Give a brief overview of the candidate for the job provided. Include all the key highlights about alignment with the job requirements and areas for improvement (2-3 sentences). Do not include common knowledge like studied ABC course in XYZ University.",
   "skillsToImprove": [
     {
       "name": "Skill Name",
@@ -19,10 +19,12 @@ Analyze the resume and job description data provided below and return ONLY a JSO
     "Skill 3"
   ],
   "recommendations": [
+    "What should the candidate concentrate on the most inorder to have higher chances to get the job?",
     "Clear, actionable steps the user should take next",
     "Include specific resources or actions"
   ],
   "suggestions": [
+    "Which resources could help?",
     "General improvement advice",
     "Study routines or project ideas"
   ],
