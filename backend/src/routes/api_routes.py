@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Create Blueprint for API routes
 api_bp = Blueprint('api', __name__)
 
-# ✅ Health check
+#  Health check
 @api_bp.route('/health', methods=['GET'])
 def api_health():
     return jsonify({
@@ -25,7 +25,7 @@ def api_health():
         'message': 'API is working correctly'
     })
 
-# ✅ User Registration
+#   User Registration
 @api_bp.route('/auth/register', methods=['POST'])
 def register_user():
     """
@@ -106,7 +106,7 @@ def register_user():
             'message': f'Registration failed: {str(e)}'
         }), 500
 
-# ✅ User Login
+#   User Login
 @api_bp.route('/auth/login', methods=['POST'])
 def login_user():
     """
@@ -166,7 +166,7 @@ def login_user():
             'message': f'Login failed: {str(e)}'
         }), 500
 
-# ✅ User Logout
+#   User Logout
 @api_bp.route('/auth/logout', methods=['POST'])
 def logout_user():
     """
@@ -203,7 +203,7 @@ def logout_user():
             'message': f'Logout failed: {str(e)}'
         }), 500
 
-# ✅ Get Current User
+#   Get Current User
 @api_bp.route('/auth/me', methods=['GET'])
 def get_current_user():
     """
@@ -245,7 +245,7 @@ def get_current_user():
             'message': f'Failed to get user information: {str(e)}'
         }), 500
 
-# ✅ Resume upload and parsing endpoint
+#   Resume upload and parsing endpoint
 @api_bp.route('/resume/upload', methods=['POST'])
 def upload_and_parse_resume():
     """
@@ -341,7 +341,7 @@ def upload_and_parse_resume():
         }), 500
 
 
-# ✅ Job description parsing endpoint
+#   Job description parsing endpoint
 @api_bp.route('/job-description/parse', methods=['POST'])
 def parse_job_description_text():
     """
@@ -421,7 +421,7 @@ def parse_job_description_text():
             'message': f'Failed to process job description: {str(e)}'
         }), 500
 
-# ✅ Get user's resumes
+#   Get user's resumes
 @api_bp.route('/resumes', methods=['GET'])
 def get_user_resumes():
     """
@@ -459,7 +459,7 @@ def get_user_resumes():
             'message': f'Failed to get resumes: {str(e)}'
         }), 500
 
-# ✅ Get user's job descriptions
+#   Get user's job descriptions
 @api_bp.route('/job-descriptions', methods=['GET'])
 def get_user_job_descriptions():
     """
@@ -497,7 +497,7 @@ def get_user_job_descriptions():
             'message': f'Failed to get job descriptions: {str(e)}'
         }), 500
 
-# ✅ Get AI suggestions
+#   Get AI suggestions
 @api_bp.route('/ai-suggestions', methods=['GET'])
 def get_ai_suggestions():
     """
@@ -549,7 +549,7 @@ def get_ai_suggestions():
             'message': f'Failed to get AI suggestions: {str(e)}'
         }), 500
 
-# ✅ Create AI suggestion
+#   Create AI suggestion
 @api_bp.route('/ai-suggestions', methods=['POST'])
 def create_ai_suggestion():
     """
@@ -620,7 +620,7 @@ def create_ai_suggestion():
             'message': f'Failed to create AI suggestion: {str(e)}'
         }), 500
 
-# ✅ Mark AI suggestion as read
+#   Mark AI suggestion as read
 @api_bp.route('/ai-suggestions/<int:suggestion_id>/read', methods=['PUT'])
 def mark_suggestion_as_read(suggestion_id):
     """
@@ -664,7 +664,7 @@ def mark_suggestion_as_read(suggestion_id):
             'message': f'Failed to mark suggestion as read: {str(e)}'
         }), 500
 
-# ✅ Generate Analysis - Create workplace with latest resume and job description
+#   Generate Analysis - Create workplace with latest resume and job description
 @api_bp.route('/analysis/generate', methods=['POST'])
 def generate_analysis():
     """
@@ -790,7 +790,7 @@ def generate_analysis():
             'message': f'Failed to generate analysis: {str(e)}'
         }), 500
 
-# ✅ Get user's workplaces
+#   Get user's workplaces
 @api_bp.route('/workplaces', methods=['GET'])
 def get_user_workplaces():
     """
@@ -828,7 +828,7 @@ def get_user_workplaces():
             'message': f'Failed to get workplaces: {str(e)}'
         }), 500
 
-# ✅ Get specific workplace with full data
+#   Get specific workplace with full data
 @api_bp.route('/workplaces/<int:workplace_id>', methods=['GET'])
 def get_workplace(workplace_id):
     """
