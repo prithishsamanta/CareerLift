@@ -50,12 +50,18 @@ const Header: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const navItems = [
+  // Define all navigation items
+  const allNavItems = [
     { path: "/home", label: "Home", icon: <Work /> },
     { path: "/upload", label: "Upload", icon: <Work /> },
     { path: "/analysis", label: "Analysis", icon: <Psychology /> },
     { path: "/tracker", label: "Tracker", icon: <Schedule /> },
   ];
+
+  // Show different navigation items based on current page
+  const navItems = location.pathname === "/home" 
+    ? [{ path: "/home", label: "Home", icon: <Work /> }]
+    : allNavItems;
 
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
