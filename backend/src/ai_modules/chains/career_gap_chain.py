@@ -5,7 +5,7 @@ import requests
 
 def get_prompt_template():
     """Load the gap analysis prompt template"""
-    prompt_path = Path("src/ai_modules/prompts/gap_analysis_prompt.txt")
+    prompt_path = Path("src/langchain/prompts/gap_analysis_prompt.txt")
     if prompt_path.exists():
         return prompt_path.read_text()
     else:
