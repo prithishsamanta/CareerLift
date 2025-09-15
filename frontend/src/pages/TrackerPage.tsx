@@ -77,8 +77,13 @@ const TrackerPage: React.FC = () => {
         setStudyPlan(response.goal.goal_data);
         setDuration(response.goal.duration_days || 14);
         
-        // Convert saved goal data to daily tasks
-        const tasks = convertStudyPlanToTasks(response.goal.goal_data);
+        // Load task completions first, then convert goal data to daily tasks
+        const completionsResponse = await apiService.getTaskCompletions(currentWorkspace.id);
+        const completions = completionsResponse.status === 'success' ? completionsResponse.completions : {};
+        setTaskCompletions(completions);
+        
+        // Convert saved goal data to daily tasks with completion data
+        const tasks = convertStudyPlanToTasks(response.goal.goal_data, completions);
         setDailyTasks(tasks);
       }
     } catch (error) {
@@ -97,6 +102,12 @@ const TrackerPage: React.FC = () => {
       
       if (response.status === 'success' && response.completions) {
         setTaskCompletions(response.completions);
+        
+        // Update daily tasks with new completion data
+        if (studyPlan) {
+          const updatedTasks = convertStudyPlanToTasks(studyPlan, response.completions);
+          setDailyTasks(updatedTasks);
+        }
       }
     } catch (error) {
       console.error('Error loading task completions:', error);
@@ -162,16 +173,20 @@ const TrackerPage: React.FC = () => {
         }
         return newTasks;
       });
+      
+      // Refresh task completions from database to ensure consistency
+      await loadTaskCompletions();
     } catch (error) {
       console.error('Error updating task completion:', error);
     }
   };
 
   // Convert study plan to daily tasks format
-  const convertStudyPlanToTasks = (plan: any) => {
+  const convertStudyPlanToTasks = (plan: any, completions: any = null) => {
     if (!plan || !plan.plan) return {};
     
     const tasks: { [key: string]: Array<{ id: number; task: string; skill: string; completed: boolean; priority: string }> } = {};
+    const completionData = completions || taskCompletions;
     
     plan.plan.forEach((item: any, index: number) => {
       if (!tasks[item.date]) {
@@ -179,7 +194,7 @@ const TrackerPage: React.FC = () => {
       }
       
       const taskId = (index + 1).toString();
-      const isCompleted = taskCompletions[item.date]?.[taskId] || false;
+      const isCompleted = completionData[item.date]?.[taskId] || false;
       
       tasks[item.date].push({
         id: index + 1,
@@ -246,8 +261,16 @@ const TrackerPage: React.FC = () => {
         setStudyPlan(data.data);
         console.log("Fetched Study Plan:", data.data);
         
-        // Convert study plan to daily tasks format
-        const convertedTasks = convertStudyPlanToTasks(data.data);
+        // Load task completions first, then convert study plan to daily tasks
+        let completions = {};
+        if (currentWorkspace?.id) {
+          const completionsResponse = await apiService.getTaskCompletions(currentWorkspace.id);
+          completions = completionsResponse.status === 'success' ? completionsResponse.completions : {};
+          setTaskCompletions(completions);
+        }
+        
+        // Convert study plan to daily tasks format with completion data
+        const convertedTasks = convertStudyPlanToTasks(data.data, completions);
         setDailyTasks(convertedTasks);
         console.log("Converted Tasks:", convertedTasks);
         
@@ -278,7 +301,16 @@ const TrackerPage: React.FC = () => {
       };
       
       setStudyPlan(fallbackStudyPlan);
-      const convertedTasks = convertStudyPlanToTasks(fallbackStudyPlan);
+      
+      // Load task completions first, then convert fallback study plan to daily tasks
+      let completions = {};
+      if (currentWorkspace?.id) {
+        const completionsResponse = await apiService.getTaskCompletions(currentWorkspace.id);
+        completions = completionsResponse.status === 'success' ? completionsResponse.completions : {};
+        setTaskCompletions(completions);
+      }
+      
+      const convertedTasks = convertStudyPlanToTasks(fallbackStudyPlan, completions);
       setDailyTasks(convertedTasks);
       
       // Save the fallback goals to database
