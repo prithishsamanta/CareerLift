@@ -128,9 +128,7 @@ def create_study_plan() -> dict:
     # The result is a Pydantic object, which can be easily converted to a dict.
     roadmap = response.model_dump()
 
-    generated_plan = json.dumps(roadmap, indent=2)
-
-    return generated_plan
+    return roadmap
 
 if __name__ == "__main__":
     create_study_plan()

@@ -10,8 +10,8 @@ from models.resume_model import ResumeModel
 from models.job_description_model import JobDescriptionModel
 from models.ai_suggestion_model import AISuggestionModel
 from models.workplace_model import WorkplaceModel
-from langchain.agents.career_gap_agent import run_gap_analysis
-from langchain.agents.roadmap_agent import create_study_plan
+from ai_modules.agents.career_gap_agent import run_gap_analysis
+from ai_modules.agents.roadmap_agent import create_study_plan
 
 logger = logging.getLogger(__name__)
 
