@@ -10,6 +10,103 @@ from models.resume_model import ResumeModel
 from models.job_description_model import JobDescriptionModel
 from models.ai_suggestion_model import AISuggestionModel
 from models.workplace_model import WorkplaceModel
+
+def create_suggestions_from_analysis(user_id: int, analysis_data: dict, resume_id: int, job_description_id: int):
+    """Create AI suggestions from analysis data"""
+    try:
+        # Create skill improvement suggestions
+        if 'skillsToImprove' in analysis_data and analysis_data['skillsToImprove']:
+            for skill in analysis_data['skillsToImprove']:
+                title = f"Improve {skill.get('name', 'Unknown Skill')}"
+                content = f"Current Level: {skill.get('current', 0)}% | Target Level: {skill.get('target', 100)}%\n\nSuggestion: {skill.get('suggestion', 'No specific suggestion provided')}"
+                priority = skill.get('urgency', 'medium').lower()
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='skills_to_improve',
+                    title=title,
+                    content=content,
+                    priority=priority
+                )
+        
+        # Create strength suggestions
+        if 'strengths' in analysis_data and analysis_data['strengths']:
+            for i, strength in enumerate(analysis_data['strengths']):
+                title = f"Strength: {strength}"
+                content = f"You have strong skills in {strength}. Consider highlighting this in your resume and interviews."
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='strengths',
+                    title=title,
+                    content=content,
+                    priority='low'
+                )
+        
+        # Create recommendation suggestions
+        if 'recommendations' in analysis_data and analysis_data['recommendations']:
+            for i, recommendation in enumerate(analysis_data['recommendations']):
+                title = f"Career Recommendation {i+1}"
+                content = recommendation
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='recommendations',
+                    title=title,
+                    content=content,
+                    priority='medium'
+                )
+        
+        # Create general suggestions
+        if 'suggestions' in analysis_data and analysis_data['suggestions']:
+            for i, suggestion in enumerate(analysis_data['suggestions']):
+                title = f"Learning Suggestion {i+1}"
+                content = suggestion
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='suggestions',
+                    title=title,
+                    content=content,
+                    priority='low'
+                )
+        
+        # Create summary suggestion
+        if 'summary' in analysis_data and analysis_data['summary']:
+            AISuggestionModel.create_suggestion(
+                user_id=user_id,
+                resume_id=resume_id,
+                job_description_id=job_description_id,
+                suggestion_type='summary',
+                title='Analysis Summary',
+                content=analysis_data['summary'],
+                priority='high'
+            )
+        
+        # Create conclusion suggestion
+        if 'conclusion' in analysis_data and analysis_data['conclusion']:
+            AISuggestionModel.create_suggestion(
+                user_id=user_id,
+                resume_id=resume_id,
+                job_description_id=job_description_id,
+                suggestion_type='conclusion',
+                title='Career Conclusion',
+                content=analysis_data['conclusion'],
+                priority='medium'
+            )
+            
+    except Exception as e:
+        logger.error(f"Error creating suggestions from analysis: {e}")
+        raise e
+
 from langchain.agents.career_gap_agent import run_gap_analysis
 
 logger = logging.getLogger(__name__)
@@ -779,6 +876,19 @@ def generate_analysis():
                 'gap_analysis': gap_analysis_result['analysis'],
                 'analysis_timestamp': datetime.now().isoformat()
             })
+            
+            # Create AI suggestions from the analysis data
+            try:
+                create_suggestions_from_analysis(
+                    user_id=user['id'],
+                    analysis_data=gap_analysis_result['analysis'],
+                    resume_id=latest_data['resume']['id'],
+                    job_description_id=latest_data['job_description']['id']
+                )
+                logger.info(f"Created AI suggestions for user {user['id']}")
+            except Exception as suggestion_error:
+                logger.error(f"Failed to create AI suggestions: {suggestion_error}")
+                # Don't fail the entire request if suggestions fail
         
         # Return workplace data with resume and job description info
         response_data = {
