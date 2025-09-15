@@ -57,8 +57,19 @@ const AnalysisPage: React.FC = () => {
       // Check for analysis data in navigation state
       if (location.state.gapAnalysis) {
         const gapAnalysis = location.state.gapAnalysis;
-        if (gapAnalysis.status === 'success' && gapAnalysis.analysis) {
+        console.log('🔍 Received gapAnalysis in AnalysisPage:', gapAnalysis);
+        
+        if (gapAnalysis && gapAnalysis.status === 'success' && gapAnalysis.analysis) {
+          console.log('✅ Setting analysis data from navigation state');
           setAnalysisData(gapAnalysis.analysis);
+        } else if (gapAnalysis && gapAnalysis.analysis) {
+          // Handle case where status might not be exactly 'success'
+          console.log('✅ Setting analysis data (no status check)');
+          setAnalysisData(gapAnalysis.analysis);
+        } else if (gapAnalysis) {
+          // Handle case where gapAnalysis is the analysis data directly
+          console.log('✅ Setting analysis data directly');
+          setAnalysisData(gapAnalysis);
         }
       }
       
@@ -82,6 +93,21 @@ const AnalysisPage: React.FC = () => {
       // Check if goals exist for this workspace
       if (currentWorkspace.id) {
         checkGoalsExist(currentWorkspace.id);
+      }
+    }
+    
+    // Fallback: Handle case where we have gapAnalysis but no workspace
+    if (!location.state?.workspace && location.state?.gapAnalysis) {
+      console.log('🔍 No workspace but have gapAnalysis, handling fallback');
+      const gapAnalysis = location.state.gapAnalysis;
+      
+      if (gapAnalysis && gapAnalysis.status === 'success' && gapAnalysis.analysis) {
+        console.log('✅ Setting analysis data from fallback');
+        setAnalysisData(gapAnalysis.analysis);
+      } else if (gapAnalysis && gapAnalysis.analysis) {
+        setAnalysisData(gapAnalysis.analysis);
+      } else if (gapAnalysis) {
+        setAnalysisData(gapAnalysis);
       }
     }
   }, [location.state, currentWorkspace, setCurrentWorkspace]);
