@@ -141,12 +141,11 @@ const ExtractPage = () => {
             
             setAnalysisStatus('Analysis generated successfully!');
             
-            
             // Navigate to analysis page after successful generation
             setTimeout(() => {
                 navigate('/analysis', { 
                     state: { 
-                        workplaceId: data.workplace.id,
+                        workspace: data.workplace,
                         resumeData: data.resume_data,
                         jobData: data.job_description_data,
                         gapAnalysis: data.gap_analysis

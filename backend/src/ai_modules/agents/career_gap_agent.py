@@ -67,7 +67,7 @@ class CareerGapAgent:
         Create an enhanced prompt that leverages AI intelligence instead of hardcoded rules
         """
         # Load base prompt from file if available
-        prompt_path = Path("src/langchain/prompts/gap_analysis_prompt.txt")
+        prompt_path = Path("src/ai_modules/prompts/gap_analysis_prompt.txt")
         if prompt_path.exists():
             base_prompt = prompt_path.read_text()
         else:
