@@ -16,7 +16,7 @@ class WorkplaceModel:
     """Workplace model for database operations"""
     
     @staticmethod
-    def create_workplace(user_id: int, resume_id: int, job_description_id: int, 
+    def create_workplace(user_id: int, resume_id: int = None, job_description_id: int = None, 
                         name: str = None, description: str = None, 
                         analysis_data: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
         """Create a new workplace (analysis session)"""
@@ -207,3 +207,46 @@ class WorkplaceModel:
         except Exception as e:
             logger.error(f"Error updating workplace analysis: {e}")
             return False
+    
+    @staticmethod
+    def update_workplace(workplace_id: int, **kwargs) -> Optional[Dict[str, Any]]:
+        """Update workplace with provided fields"""
+        try:
+            with db_config.get_connection() as conn:
+                with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                    # Build dynamic update query
+                    update_fields = []
+                    values = []
+                    
+                    for field, value in kwargs.items():
+                        if field in ['name', 'description', 'resume_id', 'job_description_id']:
+                            update_fields.append(f"{field} = %s")
+                            values.append(value)
+                        elif field == 'analysis_data':
+                            update_fields.append(f"{field} = %s")
+                            values.append(json.dumps(value) if value else None)
+                    
+                    if not update_fields:
+                        return None
+                    
+                    # Add updated_at
+                    update_fields.append("updated_at = CURRENT_TIMESTAMP")
+                    values.append(workplace_id)
+                    
+                    query = f"""
+                    UPDATE workplaces 
+                    SET {', '.join(update_fields)}
+                    WHERE id = %s
+                    """
+                    
+                    cursor.execute(query, values)
+                    
+                    if cursor.rowcount > 0:
+                        # Return updated workplace
+                        return WorkplaceModel.get_workplace_by_id(workplace_id)
+                    
+                    return None
+                    
+        except Exception as e:
+            logger.error(f"Error updating workplace: {e}")
+            return None
