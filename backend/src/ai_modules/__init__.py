@@ -1,7 +1,7 @@
-# src/langchain/__init__.py
+# src/ai_modules/__init__.py
 
 """
-LangChain module initialization.
+AI modules initialization.
 """
 
 # Optionally, expose high-level imports

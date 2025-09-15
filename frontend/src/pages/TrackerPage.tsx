@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -15,7 +15,8 @@ import {
   ListItemText,
   ListItemIcon,
   Checkbox,
-  Paper
+  Paper,
+  TextField
 } from '@mui/material';
 import {
   CalendarToday,
@@ -23,49 +24,136 @@ import {
   TrendingUp,
   Assignment,
   NavigateBefore,
-  NavigateNext
+  NavigateNext,
+  Refresh
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Chatbot, { FloatingChatButton } from '../components/Chatbot';
 import '../styles/TrackerPage.css';
+import { apiService } from '../services/api';
 
 const TrackerPage: React.FC = () => {
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [studyPlan, setStudyPlan] = useState<any>(null);
+  const [dailyTasks, setDailyTasks] = useState<{ [key: string]: Array<{ id: number; task: string; skill: string; completed: boolean; priority: string }> }>({});
+  const [duration, setDuration] = useState<number>(14);
 
-  // Mock data for daily tasks based on analysis
-  const mockDailyTasks: { [key: string]: Array<{ id: number; task: string; skill: string; completed: boolean; priority: string }> } = {
-    '2024-01-15': [
-      { id: 1, task: 'Complete React Hooks tutorial', skill: 'React.js', completed: true, priority: 'High' },
-      { id: 2, task: 'Read React documentation - Context API', skill: 'React.js', completed: false, priority: 'High' },
-    ],
-    '2024-01-16': [
-      { id: 3, task: 'Build a simple React project', skill: 'React.js', completed: false, priority: 'High' },
-      { id: 4, task: 'Practice Node.js Express basics', skill: 'Node.js', completed: false, priority: 'Medium' },
-    ],
-    '2024-01-17': [
-      { id: 5, task: 'AWS Free Tier account setup', skill: 'AWS', completed: false, priority: 'Medium' },
-      { id: 6, task: 'TypeScript fundamentals practice', skill: 'TypeScript', completed: false, priority: 'Low' },
-    ],
+  // Convert study plan to daily tasks format
+  const convertStudyPlanToTasks = (plan: any) => {
+    if (!plan || !plan.plan) return {};
+    
+    const tasks: { [key: string]: Array<{ id: number; task: string; skill: string; completed: boolean; priority: string }> } = {};
+    
+    plan.plan.forEach((item: any, index: number) => {
+      if (!tasks[item.date]) {
+        tasks[item.date] = [];
+      }
+      tasks[item.date].push({
+        id: index + 1,
+        task: item.topic,
+        skill: item.skill,
+        completed: false,
+        priority: item.priority
+      });
+    });
+    
+    return tasks;
   };
 
-  const weeklyProgress = {
-    'React.js': { completed: 2, total: 5, percentage: 40 },
-    'Node.js': { completed: 0, total: 3, percentage: 0 },
-    'AWS': { completed: 0, total: 4, percentage: 0 },
-    'TypeScript': { completed: 0, total: 2, percentage: 0 },
+  // Calculate weekly progress based on study plan
+  const calculateWeeklyProgress = () => {
+    if (!studyPlan || !studyPlan.plan) {
+      return {
+        'Cloud Infrastructure Management (AWS)': { completed: 0, total: 0, percentage: 0 },
+        'Advanced SQL Querying': { completed: 0, total: 0, percentage: 0 },
+        'Containerization with Docker & Kubernetes': { completed: 0, total: 0, percentage: 0 },
+      };
+    }
+
+    const skillCounts: { [key: string]: { completed: number; total: number } } = {};
+    
+    studyPlan.plan.forEach((item: any) => {
+      const skill = item.skill;
+      if (!skillCounts[skill]) {
+        skillCounts[skill] = { completed: 0, total: 0 };
+      }
+      skillCounts[skill].total++;
+      
+      // Check if task is completed (for now, we'll assume none are completed initially)
+      const dateStr = item.date;
+      const tasksForDate = dailyTasks[dateStr] || [];
+      const taskCompleted = tasksForDate.some(task => task.task === item.topic && task.completed);
+      if (taskCompleted) {
+        skillCounts[skill].completed++;
+      }
+    });
+
+    // Convert to percentage format
+    const progress: { [key: string]: { completed: number; total: number; percentage: number } } = {};
+    Object.keys(skillCounts).forEach(skill => {
+      const { completed, total } = skillCounts[skill];
+      progress[skill] = {
+        completed,
+        total,
+        percentage: total > 0 ? Math.round((completed / total) * 100) : 0
+      };
+    });
+
+    return progress;
   };
+
+  const weeklyProgress = calculateWeeklyProgress();
+
+    const fetchRoadmap = async () => {
+    try {
+      // Use the centralized apiService to make the request
+      const data = await apiService.getRoadMap(duration);
+
+      if (data.status === 'success') {
+        setStudyPlan(data.data);
+        console.log("Fetched Study Plan:", data.data);
+        
+        // Convert study plan to daily tasks format
+        const convertedTasks = convertStudyPlanToTasks(data.data);
+        setDailyTasks(convertedTasks);
+        console.log("Converted Tasks:", convertedTasks);
+      } else {
+        // The apiService handleResponse will usually throw an error, 
+        // but you can add extra handling here if the backend returns status:'error'
+        console.error('Failed to fetch roadmap:', data.message);
+      }
+    } catch (error: any) {
+      console.error('Error fetching roadmap:', error.message);
+      // Handle error (maybe show a user-facing notification)
+    }
+  };
+
+  // Add this useEffect to fetch the roadmap when the component mounts
+  useEffect(() => {
+    fetchRoadmap();
+  }, []);  
 
   const handleBackClick = () => {
     navigate('/analysis');
   };
 
   const handleTaskToggle = (taskId: number) => {
-    // TODO: Toggle task completion
-    console.log('Toggle task:', taskId);
+    // Find and toggle the task completion status
+    const updatedTasks = { ...dailyTasks };
+    
+    for (const date in updatedTasks) {
+      const taskIndex = updatedTasks[date].findIndex(task => task.id === taskId);
+      if (taskIndex !== -1) {
+        updatedTasks[date][taskIndex].completed = !updatedTasks[date][taskIndex].completed;
+        setDailyTasks(updatedTasks);
+        console.log('Toggled task:', taskId, 'to', updatedTasks[date][taskIndex].completed);
+        break;
+      }
+    }
   };
 
   const getPriorityColor = (priority: string) => {
@@ -101,7 +189,7 @@ const TrackerPage: React.FC = () => {
 
   const getTodayTasks = () => {
     const today = formatDate(new Date());
-    return mockDailyTasks[today] || [];
+    return dailyTasks[today] || [];
   };
 
   return (
@@ -130,8 +218,28 @@ const TrackerPage: React.FC = () => {
             >
               List View
             </Button>
+            <TextField
+              label="Duration (days)"
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(parseInt(e.target.value, 10))}
+              variant="outlined"
+              size="small"
+              sx={{ width: '150px' }}
+            />
+            <Button
+              variant="outlined"
+              onClick={fetchRoadmap}
+              startIcon={<Refresh />}
+              className="toggle-button"
+              sx={{ ml: 2 }}
+            >
+              Refresh Plan
+            </Button>
           </Box>
         </Box>
+
+
 
         <Box display="flex" gap={3} flexDirection={{ xs: 'column', lg: 'row' }}>
           {/* Main Calendar/List Area */}
@@ -161,7 +269,7 @@ const TrackerPage: React.FC = () => {
                     ))}
                     {getDaysInMonth(currentDate).map((day, index) => {
                       const dateStr = formatDate(day);
-                      const dayTasks = mockDailyTasks[dateStr] || [];
+                      const dayTasks = dailyTasks[dateStr] || [];
                       const isCurrentMonth = day.getMonth() === currentDate.getMonth();
                       const isToday = formatDate(day) === formatDate(new Date());
                       
@@ -284,10 +392,10 @@ const TrackerPage: React.FC = () => {
                   
                   <Box className="stat-item">
                     <Typography variant="body2" color="text.secondary">
-                      Tasks Completed This Week
+                      Total Tasks
                     </Typography>
                     <Typography variant="h4" className="stat-number">
-                      2
+                      {studyPlan?.plan?.length || 0}
                     </Typography>
                   </Box>
                   
@@ -295,10 +403,10 @@ const TrackerPage: React.FC = () => {
                   
                   <Box className="stat-item">
                     <Typography variant="body2" color="text.secondary">
-                      Current Streak
+                      Tasks Completed
                     </Typography>
                     <Typography variant="h4" className="stat-number">
-                      3 days
+                      {Object.values(dailyTasks).flat().filter(task => task.completed).length}
                     </Typography>
                   </Box>
                   
@@ -309,7 +417,7 @@ const TrackerPage: React.FC = () => {
                       Skills in Progress
                     </Typography>
                     <Typography variant="h4" className="stat-number">
-                      4
+                      {Object.keys(weeklyProgress).length}
                     </Typography>
                   </Box>
                 </CardContent>

@@ -1,3 +1,5 @@
+from ai_modules.chains.career_gap_chain import run_gap_analysis as run_chain_analysis
+
 import json
 import os
 import requests

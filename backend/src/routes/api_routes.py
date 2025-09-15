@@ -107,7 +107,105 @@ def create_suggestions_from_analysis(user_id: int, analysis_data: dict, resume_i
         logger.error(f"Error creating suggestions from analysis: {e}")
         raise e
 
-from langchain.agents.career_gap_agent import run_gap_analysis
+from ai_modules.agents.roadmap_agent import create_study_plan
+
+def create_suggestions_from_analysis(user_id: int, analysis_data: dict, resume_id: int, job_description_id: int):
+    """Create AI suggestions from analysis data"""
+    try:
+        # Create skill improvement suggestions
+        if 'skillsToImprove' in analysis_data and analysis_data['skillsToImprove']:
+            for skill in analysis_data['skillsToImprove']:
+                title = f"Improve {skill.get('name', 'Unknown Skill')}"
+                content = f"Current Level: {skill.get('current', 0)}% | Target Level: {skill.get('target', 100)}%\n\nSuggestion: {skill.get('suggestion', 'No specific suggestion provided')}"
+                priority = skill.get('urgency', 'medium').lower()
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='skills_to_improve',
+                    title=title,
+                    content=content,
+                    priority=priority
+                )
+        
+        # Create strength suggestions
+        if 'strengths' in analysis_data and analysis_data['strengths']:
+            for i, strength in enumerate(analysis_data['strengths']):
+                title = f"Strength: {strength}"
+                content = f"You have strong skills in {strength}. Consider highlighting this in your resume and interviews."
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='strengths',
+                    title=title,
+                    content=content,
+                    priority='low'
+                )
+        
+        # Create recommendation suggestions
+        if 'recommendations' in analysis_data and analysis_data['recommendations']:
+            for i, recommendation in enumerate(analysis_data['recommendations']):
+                title = f"Career Recommendation {i+1}"
+                content = recommendation
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='recommendations',
+                    title=title,
+                    content=content,
+                    priority='medium'
+                )
+        
+        # Create general suggestions
+        if 'suggestions' in analysis_data and analysis_data['suggestions']:
+            for i, suggestion in enumerate(analysis_data['suggestions']):
+                title = f"Learning Suggestion {i+1}"
+                content = suggestion
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='suggestions',
+                    title=title,
+                    content=content,
+                    priority='low'
+                )
+        
+        # Create summary suggestion
+        if 'summary' in analysis_data and analysis_data['summary']:
+            AISuggestionModel.create_suggestion(
+                user_id=user_id,
+                resume_id=resume_id,
+                job_description_id=job_description_id,
+                suggestion_type='summary',
+                title='Analysis Summary',
+                content=analysis_data['summary'],
+                priority='high'
+            )
+        
+        # Create conclusion suggestion
+        if 'conclusion' in analysis_data and analysis_data['conclusion']:
+            AISuggestionModel.create_suggestion(
+                user_id=user_id,
+                resume_id=resume_id,
+                job_description_id=job_description_id,
+                suggestion_type='conclusion',
+                title='Career Conclusion',
+                content=analysis_data['conclusion'],
+                priority='medium'
+            )
+            
+    except Exception as e:
+        logger.error(f"Error creating suggestions from analysis: {e}")
+        raise e
+
+from ai_modules.agents.career_gap_agent import run_gap_analysis
 
 logger = logging.getLogger(__name__)
 
@@ -1169,3 +1267,49 @@ def skill_gap_analysis():
         return jsonify({"analysis": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/create-roadmap', methods=['POST'])
+def create_roadmap():
+    try:
+        # Get input data from request
+        data = request.get_json()
+
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+            
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        duration = data.get('duration', 14)
+        # Create the study plan using the roadmap agent
+        try:
+        # ... your code that calls create_study_plan() ...
+            study_plan = create_study_plan(duration, user['id'])
+        except Exception as e:
+            # This is likely what you have now:
+            logger.error(f"Error creating roadmap: {e}")
+            
+            # Temporarily add this line to re-raise the error:
+            raise # <-- This will give you the full traceback
+        
+        return jsonify({
+            'status': 'success',
+            'data': study_plan
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error creating roadmap: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Failed to create roadmap',
+            'error': str(e)
+        }), 500

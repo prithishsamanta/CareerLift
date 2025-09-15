@@ -175,6 +175,15 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  async getRoadMap(duration: number) {
+    const response = await fetch(`${API_BASE_URL}/create-roadmap`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ duration: duration }),
+    });
+    return this.handleResponse(response);
+  }
+
   async createWorkplace(data: { name: string; description?: string }) {
     const response = await fetch(`${API_BASE_URL}/workplaces`, {
       method: "POST",
