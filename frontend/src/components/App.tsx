@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '../contexts/AuthContext';
+import { WorkspaceProvider } from '../contexts/WorkspaceContext';
 import ProtectedRoute from './ProtectedRoute';
 import LoginPage from '../pages/LoginPage';
 import SignUpPage from '../pages/SignUpPage';
@@ -13,32 +14,34 @@ import '../styles/App.css';
 function App() {
   return (
     <AuthProvider>
-      <main className="container">
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/upload" element={
-            <ProtectedRoute>
-              <ExtractPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/analysis" element={
-            <ProtectedRoute>
-              <AnalysisPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/tracker" element={
-            <ProtectedRoute>
-              <TrackerPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/home" element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </main>
+      <WorkspaceProvider>
+        <main className="container">
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/upload" element={
+              <ProtectedRoute>
+                <ExtractPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/analysis" element={
+              <ProtectedRoute>
+                <AnalysisPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/tracker" element={
+              <ProtectedRoute>
+                <TrackerPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/home" element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </main>
+      </WorkspaceProvider>
     </AuthProvider>
   );
 }

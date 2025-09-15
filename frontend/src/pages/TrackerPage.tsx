@@ -27,20 +27,31 @@ import {
   NavigateNext,
   Refresh
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Chatbot, { FloatingChatButton } from '../components/Chatbot';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import '../styles/TrackerPage.css';
 import { apiService } from '../services/api';
 
 const TrackerPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { currentWorkspace, setCurrentWorkspace } = useWorkspace();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [studyPlan, setStudyPlan] = useState<any>(null);
   const [dailyTasks, setDailyTasks] = useState<{ [key: string]: Array<{ id: number; task: string; skill: string; completed: boolean; priority: string }> }>({});
   const [duration, setDuration] = useState<number>(14);
+
+  // Handle workspace context from navigation
+  useEffect(() => {
+    // If workspace is passed via navigation state, update context
+    if (location.state?.workspace) {
+      setCurrentWorkspace(location.state.workspace);
+    }
+  }, [location.state, setCurrentWorkspace]);
 
   // Convert study plan to daily tasks format
   const convertStudyPlanToTasks = (plan: any) => {

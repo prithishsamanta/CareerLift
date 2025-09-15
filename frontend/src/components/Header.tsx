@@ -22,6 +22,7 @@ import {
   Logout,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useWorkspace } from "../contexts/WorkspaceContext";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -29,13 +30,19 @@ const Header: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { currentWorkspace } = useWorkspace();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const handleNavigation = (path: string) => {
-    navigate(path);
+    // Pass current workspace when navigating to analysis or tracker pages
+    if ((path === '/analysis' || path === '/tracker') && currentWorkspace) {
+      navigate(path, { state: { workspace: currentWorkspace } });
+    } else {
+      navigate(path);
+    }
     setMobileOpen(false);
   };
 

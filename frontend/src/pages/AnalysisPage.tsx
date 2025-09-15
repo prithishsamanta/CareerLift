@@ -23,6 +23,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Chatbot from '../components/Chatbot';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import '../styles/AnalysisPage.css';
 
 const AnalysisPage: React.FC = () => {
@@ -31,30 +32,36 @@ const AnalysisPage: React.FC = () => {
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [analysisData, setAnalysisData] = useState<any>(null);
   const [workspace, setWorkspace] = useState<any>(null);
+  const { currentWorkspace, setCurrentWorkspace } = useWorkspace();
 
-  // Extract analysis data and workspace from navigation state
+  // Extract analysis data and workspace from navigation state or context
   useEffect(() => {
-    if (location.state) {
-      // Check for workspace data (from HomePage)
-      if (location.state.workspace) {
-        setWorkspace(location.state.workspace);
-      }
+    // Priority 1: Use workspace from navigation state (direct navigation)
+    if (location.state?.workspace) {
+      setWorkspace(location.state.workspace);
+      setCurrentWorkspace(location.state.workspace); // Update context
       
-      // Check for analysis data (from ExtractPage or HomePage)
+      // Check for analysis data in navigation state
       if (location.state.gapAnalysis) {
         const gapAnalysis = location.state.gapAnalysis;
-        
         if (gapAnalysis.status === 'success' && gapAnalysis.analysis) {
           setAnalysisData(gapAnalysis.analysis);
         }
       }
       
-      // Also check if analysis data is directly in workspace (from HomePage)
-      if (location.state.workspace && location.state.workspace.analysis_data) {
+      // Check if analysis data is directly in workspace
+      if (location.state.workspace.analysis_data) {
         setAnalysisData(location.state.workspace.analysis_data);
       }
     }
-  }, [location.state]);
+    // Priority 2: Use workspace from context (header navigation)
+    else if (currentWorkspace) {
+      setWorkspace(currentWorkspace);
+      if (currentWorkspace.analysis_data) {
+        setAnalysisData(currentWorkspace.analysis_data);
+      }
+    }
+  }, [location.state, currentWorkspace, setCurrentWorkspace]);
 
   // Fallback mock data if no real data is available
   const mockAnalysis = {

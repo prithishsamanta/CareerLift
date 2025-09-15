@@ -25,6 +25,7 @@ import { useNavigate } from "react-router-dom";
 import Header from '../components/Header';
 import { apiService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 import "../styles/HomePage.css";
 
 interface Workspace {
@@ -42,6 +43,7 @@ interface Workspace {
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { setCurrentWorkspace } = useWorkspace();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
@@ -157,6 +159,9 @@ const HomePage: React.FC = () => {
   };
 
   const handleWorkspaceClick = (workspace: Workspace) => {
+    // Set the workspace in context for global access
+    setCurrentWorkspace(workspace);
+    
     // Check if workspace has analysis data
     if (workspace.analysis_data) {
       // Navigate to Analysis page with existing analysis data
@@ -167,14 +172,14 @@ const HomePage: React.FC = () => {
             status: 'success',
             analysis: workspace.analysis_data
           }
-        } 
+        }
       });
     } else {
       // Navigate to Analysis page without analysis data (will show upload prompt)
       navigate("/analysis", { 
         state: { 
           workspace
-        } 
+        }
       });
     }
   };
