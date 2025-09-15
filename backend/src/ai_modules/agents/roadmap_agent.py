@@ -4,22 +4,16 @@ from dotenv import load_dotenv
 from datetime import date
 from typing import List
 import json
+import openai
 
-# Fix for langchain verbose issue - set environment variable BEFORE any langchain imports
-os.environ["LANGCHAIN_VERBOSE"] = "true"
+# Configure Groq API for roadmap generation
+load_dotenv()
+openai.api_key = os.getenv("GROQ_API_KEY_NAYAN")
+openai.api_base = "https://api.groq.com/openai/v1"
 
-from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 from models.ai_suggestion_model import AISuggestionModel
-
-load_dotenv()
-
-# Make sure your GOOGLE_API_KEY is set as an environment variable
-# For example: os.environ["GOOGLE_API_KEY"] = "YOUR_API_KEY"
-
-# os.environ["GOOGLE_API_KEY"] = os.getenv("API_KEY")
 # 1. Define the desired JSON output structure using Pydantic
 class StudyTopic(BaseModel):
     """A single topic in the study plan."""
@@ -91,56 +85,124 @@ def create_study_plan(duration, user_id) -> dict:
 # }
 # """
 
-    print("User_id:", user_id)
+    print("🔍 User_id:", user_id)
     user_suggestions = AISuggestionModel.get_suggestions_by_user(user_id)
 
-    print(user_suggestions)
+    print("📋 Raw user_suggestions:", user_suggestions)
+    print(f"📊 Number of suggestions: {len(user_suggestions) if user_suggestions else 0}")
+
+    # Limit suggestions to avoid token limit issues - prioritize high priority ones
+    if user_suggestions and len(user_suggestions) > 20:
+        print("⚠️ Too many suggestions, filtering to top 20...")
+        # Sort by priority (high first) and take top 20
+        priority_order = {'high': 0, 'medium': 1, 'low': 2}
+        sorted_suggestions = sorted(user_suggestions, key=lambda x: priority_order.get(x.get('priority', 'low'), 2))
+        user_suggestions = sorted_suggestions[:20]
+        print(f"📊 Filtered to {len(user_suggestions)} suggestions")
 
     suggestions_text = "\n".join([f"- {s['title']}: {s['content']}" for s in user_suggestions]) if user_suggestions else "No specific suggestions provided."
-    print(suggestions_text)
+    print("🔤 Formatted suggestions_text:")
+    print(f"📏 Suggestions text length: {len(suggestions_text)}")
+    if len(suggestions_text) > 1000:
+        print(suggestions_text[:500] + "... (truncated)")
+    else:
+        print(suggestions_text)
     # Specify the desired duration
     study_duration = duration
     
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.5, google_api_key = os.getenv("API_KEY"))
-    structured_llm = llm.with_structured_output(StudyPlan)
+    # Create the prompt for Groq API
+    system_prompt = f"""
+You are an expert career coach and technical planner. Your task is to create a
+structured, realistic study plan based on an analysis of a person's resume.
+The plan should break down the learning topics chronologically over the
+specified duration. Today's date is {date.today().isoformat()}.
 
-    # 3. Create a detailed prompt template
-    # This guides the LLM on its role, the context, and the desired output format.
-    prompt = ChatPromptTemplate.from_messages([
-        ("system",
-         """
-         You are an expert career coach and technical planner. Your task is to create a
-         structured, realistic study plan based on an analysis of a person's resume.
-         The plan should break down the learning topics chronologically over the
-         specified duration. Today's date is {today_date}.
-         """
-        ),
-        ("human",
-         """
-         Please create a study plan for me based on the following resume analysis.
-         I want to complete this plan in {duration}. Make sure that the plan follows consecutive days.
+Return your response as a valid JSON object with this exact structure:
+{{
+  "plan": [
+    {{
+      "date": "YYYY-MM-DD",
+      "topic": "The specific skills or concepts to be studied on this date",
+      "skill": "The overarching skill this topic belongs to (e.g., Python, Docker, React.js)",
+      "priority": "High/Medium/Low"
+    }}
+  ]
+}}
 
-         Resume Analysis:
-         "{resume_analysis}"
+Important:
+- Return ONLY valid JSON, no extra text or formatting
+- Make sure dates are consecutive and realistic
+- Include all required fields for each topic
+- Priority should be exactly "High", "Medium", or "Low"
+"""
 
-         Along with the task, give me the skill for which the task is relevant, and a priority level (High, Medium, Low).
-         """
+    user_prompt = f"""
+Please create a study plan for me based on the following resume analysis.
+I want to complete this plan in {study_duration}. Make sure that the plan follows consecutive days.
+
+Resume Analysis:
+"{suggestions_text}"
+
+Along with the task, give me the skill for which the task is relevant, and a priority level (High, Medium, Low).
+"""
+
+    try:
+        print("🚀 Making Groq API call...")
+        print(f"📝 System prompt length: {len(system_prompt)}")
+        print(f"📝 User prompt length: {len(user_prompt)}")
+        total_length = len(system_prompt) + len(user_prompt)
+        print(f"📝 Total prompt length: {total_length}")
+        
+        # Safety check - if still too long, truncate suggestions further
+        if total_length > 15000:  # Conservative limit
+            print("⚠️ Prompt still too long, using fallback minimal suggestions...")
+            minimal_suggestions = "Focus on improving cloud infrastructure, advanced database skills, and modern development practices."
+            user_prompt = f"""
+Please create a study plan for me based on the following resume analysis.
+I want to complete this plan in {study_duration}. Make sure that the plan follows consecutive days.
+
+Resume Analysis:
+"{minimal_suggestions}"
+
+Along with the task, give me the skill for which the task is relevant, and a priority level (High, Medium, Low).
+"""
+            print(f"📝 Revised user prompt length: {len(user_prompt)}")
+        
+        # Make direct API call to Groq
+        response = openai.ChatCompletion.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.5,
+            max_tokens=3000
         )
-    ])
-
-    # 4. Create the processing chain and invoke it
-    chain = prompt | structured_llm
-    
-    response = chain.invoke({
-        "resume_analysis": suggestions_text,
-        "duration": study_duration,
-        "today_date": date.today().isoformat()
-    })
-
-    # The result is a Pydantic object, which can be easily converted to a dict.
-    roadmap = response.model_dump()
-
-    return roadmap
+        
+        print("✅ Groq API call successful")
+        result = response['choices'][0]['message']['content'].strip()
+        print(f"📄 Raw Groq response length: {len(result)}")
+        print(f"📄 Raw Groq response (first 200 chars): {result[:200]}...")
+        
+        # Try to parse as JSON to validate
+        try:
+            roadmap = json.loads(result)
+            print(f"✅ JSON parsing successful, keys: {list(roadmap.keys())}")
+            if 'plan' in roadmap:
+                print(f"📊 Plan has {len(roadmap['plan'])} items")
+            return roadmap
+        except json.JSONDecodeError:
+            # If JSON parsing fails, return a structured error
+            return {
+                "plan": [],
+                "error": "Failed to generate study plan - invalid JSON response from AI"
+            }
+            
+    except Exception as e:
+        return {
+            "plan": [],
+            "error": f"API call failed: {str(e)}"
+        }
 
 if __name__ == "__main__":
     create_study_plan()

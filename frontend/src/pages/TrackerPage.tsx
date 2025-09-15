@@ -59,12 +59,47 @@ const TrackerPage: React.FC = () => {
   // Load saved goals and task completions when workspace changes
   useEffect(() => {
     if (currentWorkspace?.id) {
-      loadSavedGoals();
-      loadTaskCompletions();
+      loadSavedGoalsOrFetchNew();
     }
   }, [currentWorkspace]);
 
-  // Load saved goals for the current workspace
+  // Load saved goals for the current workspace, or fetch new roadmap if none exist
+  const loadSavedGoalsOrFetchNew = async () => {
+    if (!currentWorkspace?.id) return;
+    
+    console.log("🔍 Loading saved goals or fetching new roadmap for workspace:", currentWorkspace.id);
+    
+    try {
+      setLoading(true);
+      const response = await apiService.getGoalByWorkplace(currentWorkspace.id);
+      
+      if (response.status === 'success' && response.goal) {
+        console.log("✅ Found saved goals, loading them...");
+        setSavedGoal(response.goal);
+        setStudyPlan(response.goal.goal_data);
+        setDuration(response.goal.duration_days || 14);
+        
+        // Load task completions first, then convert goal data to daily tasks
+        const completionsResponse = await apiService.getTaskCompletions(currentWorkspace.id);
+        const completions = completionsResponse.status === 'success' ? completionsResponse.completions : {};
+        setTaskCompletions(completions);
+        
+        // Convert saved goal data to daily tasks with completion data
+        const tasks = convertStudyPlanToTasks(response.goal.goal_data, completions);
+        setDailyTasks(tasks);
+      } else {
+        console.log("⚠️ No saved goals found, fetching new roadmap...");
+        await fetchRoadmap();
+      }
+    } catch (error) {
+      console.error('❌ Error loading saved goals, trying to fetch new roadmap:', error);
+      await fetchRoadmap();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load saved goals for the current workspace (kept for compatibility)
   const loadSavedGoals = async () => {
     if (!currentWorkspace?.id) return;
     
@@ -253,13 +288,15 @@ const TrackerPage: React.FC = () => {
   const weeklyProgress = calculateWeeklyProgress();
 
     const fetchRoadmap = async () => {
+    console.log("🚀 Starting fetchRoadmap...", { duration, currentWorkspace });
     try {
       // Use the centralized apiService to make the request
       const data = await apiService.getRoadMap(duration);
+      console.log("📊 Roadmap API response:", data);
 
       if (data.status === 'success') {
         setStudyPlan(data.data);
-        console.log("Fetched Study Plan:", data.data);
+        console.log("✅ Fetched Study Plan:", data.data);
         
         // Load task completions first, then convert study plan to daily tasks
         let completions = {};
@@ -284,7 +321,7 @@ const TrackerPage: React.FC = () => {
         console.error('Failed to fetch roadmap:', data.message);
       }
     } catch (error: any) {
-      console.error('Error fetching roadmap:', error.message);
+      console.error('❌ Error fetching roadmap:', error.message, error);
       
       // Even if roadmap creation fails, create a basic study plan and save goals
       console.log('Creating fallback study plan due to roadmap creation error');
@@ -320,10 +357,7 @@ const TrackerPage: React.FC = () => {
     }
   };
 
-  // Add this useEffect to fetch the roadmap when the component mounts
-  useEffect(() => {
-    fetchRoadmap();
-  }, []);  
+  // Note: Roadmap fetching is now handled in loadSavedGoalsOrFetchNew
 
   const handleBackClick = () => {
     navigate('/analysis');

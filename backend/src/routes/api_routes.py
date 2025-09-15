@@ -1292,12 +1292,16 @@ def create_roadmap():
         
         duration = data.get('duration', 14)
         
+        logger.info(f"🚀 Creating roadmap for user {user['id']} with duration {duration}")
+        
         # Try to create AI-powered study plan
         try:
             # Attempt to import and use AI roadmap generation
             from ai_modules.agents.roadmap_agent import create_study_plan
+            logger.info("📦 Successfully imported roadmap agent")
             study_plan = create_study_plan(duration, user['id'])
-            logger.info("AI-powered study plan created successfully")
+            logger.info(f"✅ AI-powered study plan created successfully: {type(study_plan)}")
+            logger.info(f"📊 Study plan keys: {list(study_plan.keys()) if isinstance(study_plan, dict) else 'Not a dict'}")
         except ImportError as e:
             logger.error(f"AI roadmap module not available: {e}")
             return jsonify({
