@@ -159,6 +159,78 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  // Goals endpoints
+  async createGoal(data: {
+    workplace_id: number;
+    goal_data: any;
+    duration_days?: number;
+  }) {
+    const response = await fetch(`${API_BASE_URL}/goals`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return this.handleResponse(response);
+  }
+
+  async getGoalByWorkplace(workplaceId: number) {
+    const response = await fetch(`${API_BASE_URL}/goals/workplace/${workplaceId}`, {
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  }
+
+  async getUserGoals() {
+    const response = await fetch(`${API_BASE_URL}/goals`, {
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  }
+
+  async deleteGoal(goalId: number) {
+    const response = await fetch(`${API_BASE_URL}/goals/${goalId}`, {
+      method: "DELETE",
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  }
+
+  // Task completion endpoints
+  async markTaskCompletion(data: {
+    workplace_id: number;
+    task_id: string;
+    task_date: string;
+    is_completed: boolean;
+  }) {
+    const response = await fetch(`${API_BASE_URL}/task-completions`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return this.handleResponse(response);
+  }
+
+  async getTaskCompletions(workplaceId: number, startDate?: string, endDate?: string) {
+    const params = new URLSearchParams();
+    if (startDate) params.append("start_date", startDate);
+    if (endDate) params.append("end_date", endDate);
+    
+    const response = await fetch(`${API_BASE_URL}/task-completions/workplace/${workplaceId}?${params}`, {
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  }
+
+  // Roadmap/Study Plan endpoints
+  async getRoadMap(duration: number) {
+    const response = await fetch(`${API_BASE_URL}/create-roadmap`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ duration }),
+    });
+    return this.handleResponse(response);
+  }
+
   async getWorkplaces() {
     const response = await fetch(`${API_BASE_URL}/workplaces`, {
       method: "GET",
@@ -175,14 +247,6 @@ class ApiService {
     return this.handleResponse(response);
   }
 
-  async getRoadMap(duration: number) {
-    const response = await fetch(`${API_BASE_URL}/create-roadmap`, {
-      method: "POST",
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({ duration: duration }),
-    });
-    return this.handleResponse(response);
-  }
 
   async createWorkplace(data: { name: string; description?: string }) {
     const response = await fetch(`${API_BASE_URL}/workplaces`, {

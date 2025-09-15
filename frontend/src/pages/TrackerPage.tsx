@@ -44,6 +44,9 @@ const TrackerPage: React.FC = () => {
   const [studyPlan, setStudyPlan] = useState<any>(null);
   const [dailyTasks, setDailyTasks] = useState<{ [key: string]: Array<{ id: number; task: string; skill: string; completed: boolean; priority: string }> }>({});
   const [duration, setDuration] = useState<number>(14);
+  const [savedGoal, setSavedGoal] = useState<any>(null);
+  const [taskCompletions, setTaskCompletions] = useState<{ [key: string]: { [key: string]: boolean } }>({});
+  const [loading, setLoading] = useState(false);
 
   // Handle workspace context from navigation
   useEffect(() => {
@@ -52,6 +55,117 @@ const TrackerPage: React.FC = () => {
       setCurrentWorkspace(location.state.workspace);
     }
   }, [location.state, setCurrentWorkspace]);
+
+  // Load saved goals and task completions when workspace changes
+  useEffect(() => {
+    if (currentWorkspace?.id) {
+      loadSavedGoals();
+      loadTaskCompletions();
+    }
+  }, [currentWorkspace]);
+
+  // Load saved goals for the current workspace
+  const loadSavedGoals = async () => {
+    if (!currentWorkspace?.id) return;
+    
+    try {
+      setLoading(true);
+      const response = await apiService.getGoalByWorkplace(currentWorkspace.id);
+      
+      if (response.status === 'success' && response.goal) {
+        setSavedGoal(response.goal);
+        setStudyPlan(response.goal.goal_data);
+        setDuration(response.goal.duration_days || 14);
+        
+        // Convert saved goal data to daily tasks
+        const tasks = convertStudyPlanToTasks(response.goal.goal_data);
+        setDailyTasks(tasks);
+      }
+    } catch (error) {
+      console.error('Error loading saved goals:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load task completions for the current workspace
+  const loadTaskCompletions = async () => {
+    if (!currentWorkspace?.id) return;
+    
+    try {
+      const response = await apiService.getTaskCompletions(currentWorkspace.id);
+      
+      if (response.status === 'success' && response.completions) {
+        setTaskCompletions(response.completions);
+      }
+    } catch (error) {
+      console.error('Error loading task completions:', error);
+    }
+  };
+
+  // Save goals to database
+  const saveGoals = async (goalData: any) => {
+    if (!currentWorkspace?.id) {
+      console.error('No workspace selected');
+      return false;
+    }
+    
+    try {
+      setLoading(true);
+      const response = await apiService.createGoal({
+        workplace_id: currentWorkspace.id,
+        goal_data: goalData,
+        duration_days: duration
+      });
+      
+      if (response.status === 'success') {
+        setSavedGoal(response.goal);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error saving goals:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Mark task as completed/uncompleted
+  const toggleTaskCompletion = async (taskId: string, taskDate: string, isCompleted: boolean) => {
+    if (!currentWorkspace?.id) return;
+    
+    try {
+      await apiService.markTaskCompletion({
+        workplace_id: currentWorkspace.id,
+        task_id: taskId,
+        task_date: taskDate,
+        is_completed: isCompleted
+      });
+      
+      // Update local state
+      setTaskCompletions(prev => ({
+        ...prev,
+        [taskDate]: {
+          ...prev[taskDate],
+          [taskId]: isCompleted
+        }
+      }));
+      
+      // Update daily tasks state
+      setDailyTasks(prev => {
+        const newTasks = { ...prev };
+        if (newTasks[taskDate]) {
+          newTasks[taskDate] = newTasks[taskDate].map(task => 
+            task.id.toString() === taskId ? { ...task, completed: isCompleted } : task
+          );
+        }
+        return newTasks;
+      });
+    } catch (error) {
+      console.error('Error updating task completion:', error);
+    }
+  };
 
   // Convert study plan to daily tasks format
   const convertStudyPlanToTasks = (plan: any) => {
@@ -63,11 +177,15 @@ const TrackerPage: React.FC = () => {
       if (!tasks[item.date]) {
         tasks[item.date] = [];
       }
+      
+      const taskId = (index + 1).toString();
+      const isCompleted = taskCompletions[item.date]?.[taskId] || false;
+      
       tasks[item.date].push({
         id: index + 1,
         task: item.topic,
         skill: item.skill,
-        completed: false,
+        completed: isCompleted,
         priority: item.priority
       });
     });
@@ -132,6 +250,11 @@ const TrackerPage: React.FC = () => {
         const convertedTasks = convertStudyPlanToTasks(data.data);
         setDailyTasks(convertedTasks);
         console.log("Converted Tasks:", convertedTasks);
+        
+        // Save the goals to database
+        if (currentWorkspace?.id) {
+          await saveGoals(data.data);
+        }
       } else {
         // The apiService handleResponse will usually throw an error, 
         // but you can add extra handling here if the backend returns status:'error'
@@ -139,7 +262,29 @@ const TrackerPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error fetching roadmap:', error.message);
-      // Handle error (maybe show a user-facing notification)
+      
+      // Even if roadmap creation fails, create a basic study plan and save goals
+      console.log('Creating fallback study plan due to roadmap creation error');
+      
+      const fallbackStudyPlan = {
+        plan: [
+          {
+            date: new Date().toISOString().split('T')[0],
+            topic: "Review your analysis and create a learning plan",
+            skill: "General",
+            priority: "High"
+          }
+        ]
+      };
+      
+      setStudyPlan(fallbackStudyPlan);
+      const convertedTasks = convertStudyPlanToTasks(fallbackStudyPlan);
+      setDailyTasks(convertedTasks);
+      
+      // Save the fallback goals to database
+      if (currentWorkspace?.id) {
+        await saveGoals(fallbackStudyPlan);
+      }
     }
   };
 
@@ -153,17 +298,22 @@ const TrackerPage: React.FC = () => {
   };
 
   const handleTaskToggle = (taskId: number) => {
-    // Find and toggle the task completion status
-    const updatedTasks = { ...dailyTasks };
+    // Find the task and its date
+    let taskDate = '';
+    let currentCompleted = false;
     
-    for (const date in updatedTasks) {
-      const taskIndex = updatedTasks[date].findIndex(task => task.id === taskId);
-      if (taskIndex !== -1) {
-        updatedTasks[date][taskIndex].completed = !updatedTasks[date][taskIndex].completed;
-        setDailyTasks(updatedTasks);
-        console.log('Toggled task:', taskId, 'to', updatedTasks[date][taskIndex].completed);
+    for (const date in dailyTasks) {
+      const task = dailyTasks[date].find(task => task.id === taskId);
+      if (task) {
+        taskDate = date;
+        currentCompleted = task.completed;
         break;
       }
+    }
+    
+    if (taskDate) {
+      const newCompleted = !currentCompleted;
+      toggleTaskCompletion(taskId.toString(), taskDate, newCompleted);
     }
   };
 

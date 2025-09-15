@@ -24,6 +24,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Chatbot from '../components/Chatbot';
 import { useWorkspace } from '../contexts/WorkspaceContext';
+import { apiService } from '../services/api';
 import '../styles/AnalysisPage.css';
 
 const AnalysisPage: React.FC = () => {
@@ -32,7 +33,19 @@ const AnalysisPage: React.FC = () => {
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [analysisData, setAnalysisData] = useState<any>(null);
   const [workspace, setWorkspace] = useState<any>(null);
+  const [hasGoals, setHasGoals] = useState(false);
   const { currentWorkspace, setCurrentWorkspace } = useWorkspace();
+
+  // Check if goals exist for the current workspace
+  const checkGoalsExist = async (workspaceId: number) => {
+    try {
+      const response = await apiService.getGoalByWorkplace(workspaceId);
+      setHasGoals(response.status === 'success' && response.goal !== null);
+    } catch (error) {
+      console.error('Error checking goals:', error);
+      setHasGoals(false);
+    }
+  };
 
   // Extract analysis data and workspace from navigation state or context
   useEffect(() => {
@@ -53,12 +66,22 @@ const AnalysisPage: React.FC = () => {
       if (location.state.workspace.analysis_data) {
         setAnalysisData(location.state.workspace.analysis_data);
       }
+      
+      // Check if goals exist for this workspace
+      if (location.state.workspace.id) {
+        checkGoalsExist(location.state.workspace.id);
+      }
     }
     // Priority 2: Use workspace from context (header navigation)
     else if (currentWorkspace) {
       setWorkspace(currentWorkspace);
       if (currentWorkspace.analysis_data) {
         setAnalysisData(currentWorkspace.analysis_data);
+      }
+      
+      // Check if goals exist for this workspace
+      if (currentWorkspace.id) {
+        checkGoalsExist(currentWorkspace.id);
       }
     }
   }, [location.state, currentWorkspace, setCurrentWorkspace]);
@@ -137,7 +160,11 @@ const AnalysisPage: React.FC = () => {
   };
 
   const handleSetPlan = () => {
-    navigate('/tracker');
+    navigate('/tracker', { 
+      state: { 
+        workspace: workspace || currentWorkspace
+      } 
+    });
   };
 
   const getUrgencyColor = (urgency: string) => {
@@ -551,7 +578,7 @@ const AnalysisPage: React.FC = () => {
                       className="action-button plan-button"
                       fullWidth
                     >
-                      Create Learning Plan
+                      {hasGoals ? 'View Goals' : 'Create Learning Plan'}
                     </Button>
                   </Box>
                 </CardContent>

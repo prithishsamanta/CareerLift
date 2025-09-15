@@ -10,6 +10,7 @@ from models.resume_model import ResumeModel
 from models.job_description_model import JobDescriptionModel
 from models.ai_suggestion_model import AISuggestionModel
 from models.workplace_model import WorkplaceModel
+from models.goals_model import GoalsModel, TaskCompletionModel
 
 def create_suggestions_from_analysis(user_id: int, analysis_data: dict, resume_id: int, job_description_id: int):
     """Create AI suggestions from analysis data"""
@@ -1290,16 +1291,27 @@ def create_roadmap():
             }), 401
         
         duration = data.get('duration', 14)
-        # Create the study plan using the roadmap agent
+        
+        # Try to create AI-powered study plan
         try:
-        # ... your code that calls create_study_plan() ...
+            # Attempt to import and use AI roadmap generation
+            from ai_modules.agents.roadmap_agent import create_study_plan
             study_plan = create_study_plan(duration, user['id'])
+            logger.info("AI-powered study plan created successfully")
+        except ImportError as e:
+            logger.error(f"AI roadmap module not available: {e}")
+            return jsonify({
+                'status': 'error',
+                'message': 'AI roadmap generation is currently unavailable',
+                'error': str(e)
+            }), 503
         except Exception as e:
-            # This is likely what you have now:
-            logger.error(f"Error creating roadmap: {e}")
-            
-            # Temporarily add this line to re-raise the error:
-            raise # <-- This will give you the full traceback
+            logger.error(f"AI roadmap generation failed: {e}")
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to generate AI-powered study plan',
+                'error': str(e)
+            }), 500
         
         return jsonify({
             'status': 'success',
@@ -1312,4 +1324,324 @@ def create_roadmap():
             'status': 'error',
             'message': 'Failed to create roadmap',
             'error': str(e)
+        }), 500
+
+# Goals API endpoints
+
+@api_bp.route('/goals', methods=['POST'])
+def create_goal():
+    """
+    Create or update a goal for a workplace
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Check if JSON data is present in request
+        if not request.is_json:
+            return jsonify({
+                'status': 'error',
+                'message': 'Request must contain JSON data'
+            }), 400
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['workplace_id', 'goal_data']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'status': 'error',
+                    'message': f'{field} is required'
+                }), 400
+        
+        # Create or update goal
+        goal = GoalsModel.create_goal(
+            user_id=user['id'],
+            workplace_id=data['workplace_id'],
+            goal_data=data['goal_data'],
+            duration_days=data.get('duration_days', 14)
+        )
+        
+        if not goal:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to create/update goal'
+            }), 500
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Goal saved successfully',
+            'goal': goal
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"Create goal error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to create goal: {str(e)}'
+        }), 500
+
+@api_bp.route('/goals/workplace/<int:workplace_id>', methods=['GET'])
+def get_goal_by_workplace(workplace_id):
+    """
+    Get the active goal for a specific workplace
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get goal for workplace
+        goal = GoalsModel.get_goal_by_workplace(user['id'], workplace_id)
+        
+        if goal:
+            return jsonify({
+                'status': 'success',
+                'goal': goal
+            }), 200
+        else:
+            return jsonify({
+                'status': 'success',
+                'goal': None,
+                'message': 'No active goal found for this workplace'
+            }), 200
+        
+    except Exception as e:
+        logger.error(f"Get goal by workplace error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to get goal: {str(e)}'
+        }), 500
+
+@api_bp.route('/goals', methods=['GET'])
+def get_user_goals():
+    """
+    Get all goals for the authenticated user
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get all goals for user
+        goals = GoalsModel.get_goals_by_user(user['id'])
+        
+        return jsonify({
+            'status': 'success',
+            'goals': goals
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Get user goals error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to get goals: {str(e)}'
+        }), 500
+
+@api_bp.route('/goals/<int:goal_id>', methods=['DELETE'])
+def delete_goal(goal_id):
+    """
+    Delete a goal
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Delete goal
+        success = GoalsModel.delete_goal(goal_id, user['id'])
+        
+        if success:
+            return jsonify({
+                'status': 'success',
+                'message': 'Goal deleted successfully'
+            }), 200
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'Goal not found or could not be deleted'
+            }), 404
+        
+    except Exception as e:
+        logger.error(f"Delete goal error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to delete goal: {str(e)}'
+        }), 500
+
+# Task completion API endpoints
+
+@api_bp.route('/task-completions', methods=['POST'])
+def mark_task_completion():
+    """
+    Mark a task as completed or uncompleted
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Check if JSON data is present in request
+        if not request.is_json:
+            return jsonify({
+                'status': 'error',
+                'message': 'Request must contain JSON data'
+            }), 400
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['workplace_id', 'task_id', 'task_date']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'status': 'error',
+                    'message': f'{field} is required'
+                }), 400
+        
+        # Mark task completion
+        success = TaskCompletionModel.mark_task_completed(
+            user_id=user['id'],
+            workplace_id=data['workplace_id'],
+            task_id=data['task_id'],
+            task_date=datetime.strptime(data['task_date'], '%Y-%m-%d').date(),
+            is_completed=data.get('is_completed', True)
+        )
+        
+        if success:
+            return jsonify({
+                'status': 'success',
+                'message': 'Task completion updated successfully'
+            }), 200
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to update task completion'
+            }), 500
+        
+    except Exception as e:
+        logger.error(f"Mark task completion error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to update task completion: {str(e)}'
+        }), 500
+
+@api_bp.route('/task-completions/workplace/<int:workplace_id>', methods=['GET'])
+def get_task_completions(workplace_id):
+    """
+    Get task completion status for a workplace
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get query parameters for date range
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        start_date_obj = None
+        end_date_obj = None
+        
+        if start_date:
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+        if end_date:
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+        
+        # Get task completions
+        completions = TaskCompletionModel.get_task_completions(
+            user_id=user['id'],
+            workplace_id=workplace_id,
+            start_date=start_date_obj,
+            end_date=end_date_obj
+        )
+        
+        # Get completion stats
+        stats = TaskCompletionModel.get_completion_stats(user['id'], workplace_id)
+        
+        return jsonify({
+            'status': 'success',
+            'completions': completions,
+            'stats': stats
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Get task completions error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to get task completions: {str(e)}'
         }), 500

@@ -146,9 +146,9 @@ const HomePage: React.FC = () => {
         const updatedWorkspaces = [newWorkspace, ...workspaces];
         setWorkspaces(updatedWorkspaces);
         
-        setNewWorkspaceName("");
+      setNewWorkspaceName("");
         setWorkspaceNameError(null);
-        setCreateDialogOpen(false);
+      setCreateDialogOpen(false);
       } else {
         setError(response.message || 'Failed to create workspace');
       }
@@ -295,13 +295,13 @@ const HomePage: React.FC = () => {
             </Box>
           ) : (
             <Box className="workspaces-grid" sx={{ width: '100%' }}>
-              {/* Existing Workspaces */}
-              {workspaces.map((workspace) => (
-                <Box key={workspace.id} className="workspace-grid-item">
-                  <Card
-                    className="workspace-card"
-                    elevation={2}
-                    onClick={() => handleWorkspaceClick(workspace)}
+            {/* Existing Workspaces */}
+            {workspaces.map((workspace) => (
+              <Box key={workspace.id} className="workspace-grid-item">
+                <Card
+                  className="workspace-card"
+                  elevation={2}
+                  onClick={() => handleWorkspaceClick(workspace)}
                     sx={{
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
@@ -406,15 +406,15 @@ const HomePage: React.FC = () => {
                             }}
                           />
                           Ready to Analyze
-                        </Box>
+                    </Box>
                       )}
-                      
+
                       <Box className="workspace-timestamps">
                         {(() => {
                           const timestamp = getWorkspaceTimestamp(workspace);
                           return (
-                            <Typography 
-                              variant="body2" 
+                    <Typography
+                      variant="body2"
                               sx={{ 
                                 color: timestamp.color,
                                 fontSize: '0.75rem',
@@ -422,21 +422,21 @@ const HomePage: React.FC = () => {
                               }}
                             >
                               {timestamp.label}: {formatDateTime(timestamp.time)}
-                            </Typography>
+                    </Typography>
                           );
                         })()}
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Box>
-              ))}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Box>
+            ))}
 
-              {/* Create New Workspace Card */}
-              <Box className="workspace-grid-item">
-                <Card
-                  className="create-workspace-card"
-                  elevation={2}
-                  onClick={() => setCreateDialogOpen(true)}
+            {/* Create New Workspace Card */}
+            <Box className="workspace-grid-item">
+              <Card
+                className="create-workspace-card"
+                elevation={2}
+                onClick={() => setCreateDialogOpen(true)}
                   sx={{
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
@@ -476,7 +476,7 @@ const HomePage: React.FC = () => {
                       }}
                     >
                       <Add sx={{ fontSize: 24, color: 'white' }} />
-                    </Box>
+                  </Box>
                     
                     <Typography 
                       variant="h6" 
@@ -490,8 +490,8 @@ const HomePage: React.FC = () => {
                         textAlign: 'center'
                       }}
                     >
-                      Create New Workspace
-                    </Typography>
+                    Create New Workspace
+                  </Typography>
                     
                     <Typography 
                       variant="body2" 
@@ -504,12 +504,12 @@ const HomePage: React.FC = () => {
                         mt: 0.5
                       }}
                     >
-                      Start a new skill development journey
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Box>
+                    Start a new skill development journey
+                  </Typography>
+                </CardContent>
+              </Card>
             </Box>
+          </Box>
           )}
         </Box>
       </Container>

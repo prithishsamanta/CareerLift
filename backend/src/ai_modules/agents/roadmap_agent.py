@@ -11,6 +11,18 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 from models.ai_suggestion_model import AISuggestionModel
 
+# Fix for langchain verbose issue
+try:
+    import langchain
+    if hasattr(langchain, 'verbose'):
+        langchain.verbose = True
+    else:
+        # Set environment variable for langchain verbose mode
+        os.environ["LANGCHAIN_VERBOSE"] = "true"
+except Exception:
+    # If langchain import fails, just set the environment variable
+    os.environ["LANGCHAIN_VERBOSE"] = "true"
+
 load_dotenv()
 
 # Make sure your GOOGLE_API_KEY is set as an environment variable

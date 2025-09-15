@@ -112,6 +112,44 @@ CREATE TABLE IF NOT EXISTS workplaces (
     INDEX idx_created_at (created_at)
 );
 
+-- Goals table to store learning goals and study plans
+CREATE TABLE IF NOT EXISTS goals (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    workplace_id BIGINT NOT NULL,
+    goal_data JSON NOT NULL,
+    duration_days INT DEFAULT 14,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (workplace_id) REFERENCES workplaces(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_workplace_id (workplace_id),
+    INDEX idx_is_active (is_active),
+    INDEX idx_created_at (created_at)
+);
+
+-- Task completion tracking table
+CREATE TABLE IF NOT EXISTS task_completions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    workplace_id BIGINT NOT NULL,
+    task_id VARCHAR(255) NOT NULL,
+    task_date DATE NOT NULL,
+    is_completed BOOLEAN DEFAULT FALSE,
+    completed_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (workplace_id) REFERENCES workplaces(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_task_date (user_id, workplace_id, task_id, task_date),
+    INDEX idx_user_id (user_id),
+    INDEX idx_workplace_id (workplace_id),
+    INDEX idx_task_date (task_date),
+    INDEX idx_is_completed (is_completed)
+);
+
 -- User sessions table for authentication tracking
 CREATE TABLE IF NOT EXISTS user_sessions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
