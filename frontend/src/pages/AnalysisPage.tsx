@@ -40,13 +40,18 @@ const AnalysisPage: React.FC = () => {
         setWorkspace(location.state.workspace);
       }
       
-      // Check for analysis data (from ExtractPage)
+      // Check for analysis data (from ExtractPage or HomePage)
       if (location.state.gapAnalysis) {
         const gapAnalysis = location.state.gapAnalysis;
         
         if (gapAnalysis.status === 'success' && gapAnalysis.analysis) {
           setAnalysisData(gapAnalysis.analysis);
         }
+      }
+      
+      // Also check if analysis data is directly in workspace (from HomePage)
+      if (location.state.workspace && location.state.workspace.analysis_data) {
+        setAnalysisData(location.state.workspace.analysis_data);
       }
     }
   }, [location.state]);
@@ -76,7 +81,36 @@ const AnalysisPage: React.FC = () => {
   };
 
   // Use real data if available, otherwise use mock data
-  const currentAnalysis = analysisData || mockAnalysis;
+  // Handle different possible data structures
+  let processedAnalysisData = null;
+  
+  if (analysisData) {
+    processedAnalysisData = analysisData;
+  } else if (workspace?.analysis_data) {
+    processedAnalysisData = workspace.analysis_data;
+  }
+  
+  // Transform the data structure to match expected format
+  let transformedAnalysis = null;
+  if (processedAnalysisData) {
+    // Check if data is nested under 'gap_analysis'
+    if (processedAnalysisData.gap_analysis) {
+      transformedAnalysis = {
+        summary: processedAnalysisData.gap_analysis.summary || processedAnalysisData.gap_analysis.conclusion || "Analysis completed successfully.",
+        skillsToImprove: processedAnalysisData.gap_analysis.skillsToImprove || processedAnalysisData.gap_analysis.skills_to_improve || [],
+        strengths: processedAnalysisData.gap_analysis.strengths || processedAnalysisData.gap_analysis.strong_points || [],
+        recommendations: processedAnalysisData.gap_analysis.recommendations || processedAnalysisData.gap_analysis.suggestions || [],
+        suggestions: processedAnalysisData.gap_analysis.suggestions || processedAnalysisData.gap_analysis.recommendations || [],
+        conclusion: processedAnalysisData.gap_analysis.conclusion || processedAnalysisData.gap_analysis.summary || "Analysis completed."
+      };
+    } else {
+      // Use data as-is if it's already in the expected format
+      transformedAnalysis = processedAnalysisData;
+    }
+  }
+  
+  const currentAnalysis = transformedAnalysis || mockAnalysis;
+
 
   const handleBackClick = () => {
     navigate('/home');
@@ -86,10 +120,7 @@ const AnalysisPage: React.FC = () => {
     // Navigate to upload page with workspace context
     navigate('/upload', { 
       state: { 
-        workspaceName: workspace?.name || '',
-        workspaceDescription: workspace?.description || '',
-        isTemporary: location.state?.isTemporary || false,
-        tempWorkspaceId: location.state?.tempWorkspaceId || null
+        workspace: workspace
       } 
     });
   };
@@ -128,6 +159,7 @@ const AnalysisPage: React.FC = () => {
             </Typography>
           </Box>
         )}
+
 
         {/* Show upload prompt if no analysis data */}
         {!analysisData && (
@@ -358,7 +390,7 @@ const AnalysisPage: React.FC = () => {
         )}
 
         {/* Show analysis data if available */}
-        {analysisData && (
+        {(analysisData || workspace?.analysis_data) && (
           <Box display="flex" gap={4} flexDirection={{ xs: 'column', lg: 'row' }}>
             {/* Main Analysis Section */}
             <Box flex="1" maxWidth={{ lg: '66%' }}>

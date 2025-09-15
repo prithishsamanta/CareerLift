@@ -135,9 +135,18 @@ const SignUpPage: React.FC = () => {
       <Box className="header-section">
         <Container maxWidth="lg">
           <Box py={3}>
-            <Typography variant="h4" className="page-title">
-              <PersonAdd sx={{ mr: 2, color: '#3b82f6' }} />
-              Create Your Account
+            <Typography 
+              variant="h4" 
+              className="page-title"
+              sx={{
+                fontWeight: 800,
+                background: "linear-gradient(45deg, #3182ce, #2c5aa0)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              CareerLift
             </Typography>
           </Box>
         </Container>
@@ -150,10 +159,10 @@ const SignUpPage: React.FC = () => {
             {/* Welcome Section */}
             <Box textAlign="center" mb={4}>
               <Typography variant="h5" fontWeight="bold" color="text.primary" mb={1}>
-                Join Resume Tracker
+                Join CareerLift
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Create your account to start tracking your job applications
+                Create your account to start your career journey
               </Typography>
             </Box>
 
