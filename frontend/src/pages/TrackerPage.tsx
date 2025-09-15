@@ -15,7 +15,8 @@ import {
   ListItemText,
   ListItemIcon,
   Checkbox,
-  Paper
+  Paper,
+  TextField
 } from '@mui/material';
 import {
   CalendarToday,
@@ -30,6 +31,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Chatbot, { FloatingChatButton } from '../components/Chatbot';
 import '../styles/TrackerPage.css';
+import { apiService } from '../services/api';
 
 const TrackerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -38,6 +40,7 @@ const TrackerPage: React.FC = () => {
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [studyPlan, setStudyPlan] = useState<any>(null);
   const [dailyTasks, setDailyTasks] = useState<{ [key: string]: Array<{ id: number; task: string; skill: string; completed: boolean; priority: string }> }>({});
+  const [duration, setDuration] = useState<number>(14);
 
   // Convert study plan to daily tasks format
   const convertStudyPlanToTasks = (plan: any) => {
@@ -107,29 +110,25 @@ const TrackerPage: React.FC = () => {
 
     const fetchRoadmap = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/create-roadmap', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // Use the centralized apiService to make the request
+      const data = await apiService.getRoadMap(duration);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch roadmap');
-      }
-
-      const data = await response.json();
       if (data.status === 'success') {
         setStudyPlan(data.data);
         console.log("Fetched Study Plan:", data.data);
+        
         // Convert study plan to daily tasks format
         const convertedTasks = convertStudyPlanToTasks(data.data);
         setDailyTasks(convertedTasks);
         console.log("Converted Tasks:", convertedTasks);
+      } else {
+        // The apiService handleResponse will usually throw an error, 
+        // but you can add extra handling here if the backend returns status:'error'
+        console.error('Failed to fetch roadmap:', data.message);
       }
-    } catch (error) {
-      console.error('Error fetching roadmap:', error);
-      // Handle error (maybe show a notification)
+    } catch (error: any) {
+      console.error('Error fetching roadmap:', error.message);
+      // Handle error (maybe show a user-facing notification)
     }
   };
 
@@ -219,6 +218,15 @@ const TrackerPage: React.FC = () => {
             >
               List View
             </Button>
+            <TextField
+              label="Duration (days)"
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(parseInt(e.target.value, 10))}
+              variant="outlined"
+              size="small"
+              sx={{ width: '150px' }}
+            />
             <Button
               variant="outlined"
               onClick={fetchRoadmap}
@@ -230,6 +238,8 @@ const TrackerPage: React.FC = () => {
             </Button>
           </Box>
         </Box>
+
+
 
         <Box display="flex" gap={3} flexDirection={{ xs: 'column', lg: 'row' }}>
           {/* Main Calendar/List Area */}

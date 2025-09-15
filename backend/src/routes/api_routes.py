@@ -10,15 +10,112 @@ from models.resume_model import ResumeModel
 from models.job_description_model import JobDescriptionModel
 from models.ai_suggestion_model import AISuggestionModel
 from models.workplace_model import WorkplaceModel
-from ai_modules.agents.career_gap_agent import run_gap_analysis
 from ai_modules.agents.roadmap_agent import create_study_plan
+
+def create_suggestions_from_analysis(user_id: int, analysis_data: dict, resume_id: int, job_description_id: int):
+    """Create AI suggestions from analysis data"""
+    try:
+        # Create skill improvement suggestions
+        if 'skillsToImprove' in analysis_data and analysis_data['skillsToImprove']:
+            for skill in analysis_data['skillsToImprove']:
+                title = f"Improve {skill.get('name', 'Unknown Skill')}"
+                content = f"Current Level: {skill.get('current', 0)}% | Target Level: {skill.get('target', 100)}%\n\nSuggestion: {skill.get('suggestion', 'No specific suggestion provided')}"
+                priority = skill.get('urgency', 'medium').lower()
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='skills_to_improve',
+                    title=title,
+                    content=content,
+                    priority=priority
+                )
+        
+        # Create strength suggestions
+        if 'strengths' in analysis_data and analysis_data['strengths']:
+            for i, strength in enumerate(analysis_data['strengths']):
+                title = f"Strength: {strength}"
+                content = f"You have strong skills in {strength}. Consider highlighting this in your resume and interviews."
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='strengths',
+                    title=title,
+                    content=content,
+                    priority='low'
+                )
+        
+        # Create recommendation suggestions
+        if 'recommendations' in analysis_data and analysis_data['recommendations']:
+            for i, recommendation in enumerate(analysis_data['recommendations']):
+                title = f"Career Recommendation {i+1}"
+                content = recommendation
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='recommendations',
+                    title=title,
+                    content=content,
+                    priority='medium'
+                )
+        
+        # Create general suggestions
+        if 'suggestions' in analysis_data and analysis_data['suggestions']:
+            for i, suggestion in enumerate(analysis_data['suggestions']):
+                title = f"Learning Suggestion {i+1}"
+                content = suggestion
+                
+                AISuggestionModel.create_suggestion(
+                    user_id=user_id,
+                    resume_id=resume_id,
+                    job_description_id=job_description_id,
+                    suggestion_type='suggestions',
+                    title=title,
+                    content=content,
+                    priority='low'
+                )
+        
+        # Create summary suggestion
+        if 'summary' in analysis_data and analysis_data['summary']:
+            AISuggestionModel.create_suggestion(
+                user_id=user_id,
+                resume_id=resume_id,
+                job_description_id=job_description_id,
+                suggestion_type='summary',
+                title='Analysis Summary',
+                content=analysis_data['summary'],
+                priority='high'
+            )
+        
+        # Create conclusion suggestion
+        if 'conclusion' in analysis_data and analysis_data['conclusion']:
+            AISuggestionModel.create_suggestion(
+                user_id=user_id,
+                resume_id=resume_id,
+                job_description_id=job_description_id,
+                suggestion_type='conclusion',
+                title='Career Conclusion',
+                content=analysis_data['conclusion'],
+                priority='medium'
+            )
+            
+    except Exception as e:
+        logger.error(f"Error creating suggestions from analysis: {e}")
+        raise e
+
+from ai_modules.agents.career_gap_agent import run_gap_analysis
 
 logger = logging.getLogger(__name__)
 
 # Create Blueprint for API routes
 api_bp = Blueprint('api', __name__)
 
-# ✅ Health check
+#  Health check
 @api_bp.route('/health', methods=['GET'])
 def api_health():
     return jsonify({
@@ -26,7 +123,7 @@ def api_health():
         'message': 'API is working correctly'
     })
 
-# ✅ User Registration
+#   User Registration
 @api_bp.route('/auth/register', methods=['POST'])
 def register_user():
     """
@@ -107,7 +204,7 @@ def register_user():
             'message': f'Registration failed: {str(e)}'
         }), 500
 
-# ✅ User Login
+#   User Login
 @api_bp.route('/auth/login', methods=['POST'])
 def login_user():
     """
@@ -167,7 +264,7 @@ def login_user():
             'message': f'Login failed: {str(e)}'
         }), 500
 
-# ✅ User Logout
+#   User Logout
 @api_bp.route('/auth/logout', methods=['POST'])
 def logout_user():
     """
@@ -204,7 +301,7 @@ def logout_user():
             'message': f'Logout failed: {str(e)}'
         }), 500
 
-# ✅ Get Current User
+#   Get Current User
 @api_bp.route('/auth/me', methods=['GET'])
 def get_current_user():
     """
@@ -246,7 +343,7 @@ def get_current_user():
             'message': f'Failed to get user information: {str(e)}'
         }), 500
 
-# ✅ Resume upload and parsing endpoint
+#   Resume upload and parsing endpoint
 @api_bp.route('/resume/upload', methods=['POST'])
 def upload_and_parse_resume():
     """
@@ -342,7 +439,7 @@ def upload_and_parse_resume():
         }), 500
 
 
-# ✅ Job description parsing endpoint
+#   Job description parsing endpoint
 @api_bp.route('/job-description/parse', methods=['POST'])
 def parse_job_description_text():
     """
@@ -422,7 +519,7 @@ def parse_job_description_text():
             'message': f'Failed to process job description: {str(e)}'
         }), 500
 
-# ✅ Get user's resumes
+#   Get user's resumes
 @api_bp.route('/resumes', methods=['GET'])
 def get_user_resumes():
     """
@@ -460,7 +557,7 @@ def get_user_resumes():
             'message': f'Failed to get resumes: {str(e)}'
         }), 500
 
-# ✅ Get user's job descriptions
+#   Get user's job descriptions
 @api_bp.route('/job-descriptions', methods=['GET'])
 def get_user_job_descriptions():
     """
@@ -498,7 +595,7 @@ def get_user_job_descriptions():
             'message': f'Failed to get job descriptions: {str(e)}'
         }), 500
 
-# ✅ Get AI suggestions
+#   Get AI suggestions
 @api_bp.route('/ai-suggestions', methods=['GET'])
 def get_ai_suggestions():
     """
@@ -550,7 +647,7 @@ def get_ai_suggestions():
             'message': f'Failed to get AI suggestions: {str(e)}'
         }), 500
 
-# ✅ Create AI suggestion
+#   Create AI suggestion
 @api_bp.route('/ai-suggestions', methods=['POST'])
 def create_ai_suggestion():
     """
@@ -621,7 +718,7 @@ def create_ai_suggestion():
             'message': f'Failed to create AI suggestion: {str(e)}'
         }), 500
 
-# ✅ Mark AI suggestion as read
+#   Mark AI suggestion as read
 @api_bp.route('/ai-suggestions/<int:suggestion_id>/read', methods=['PUT'])
 def mark_suggestion_as_read(suggestion_id):
     """
@@ -665,7 +762,7 @@ def mark_suggestion_as_read(suggestion_id):
             'message': f'Failed to mark suggestion as read: {str(e)}'
         }), 500
 
-# ✅ Generate Analysis - Create workplace with latest resume and job description
+#   Generate Analysis - Create workplace with latest resume and job description
 @api_bp.route('/analysis/generate', methods=['POST'])
 def generate_analysis():
     """
@@ -708,20 +805,38 @@ def generate_analysis():
                 'message': 'No job description found. Please add a job description first.'
             }), 400
         
-        # Create workplace with the latest resume and job description
-        workplace = WorkplaceModel.create_workplace(
-            user_id=user['id'],
-            resume_id=latest_data['resume']['id'],
-            job_description_id=latest_data['job_description']['id'],
-            name=workplace_name,
-            description=workplace_description
-        )
+        # Check if we should update an existing workplace or create a new one
+        workplace = None
+        workplace_id = data.get('workplace_id')
         
-        if not workplace:
-            return jsonify({
-                'status': 'error',
-                'message': 'Failed to create analysis session'
-            }), 500
+        if workplace_id:
+            # Update existing workplace
+            workplace = WorkplaceModel.update_workplace(
+                workplace_id,
+                resume_id=latest_data['resume']['id'],
+                job_description_id=latest_data['job_description']['id']
+            )
+            
+            if not workplace:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Failed to update workspace'
+                }), 500
+        else:
+            # Create new workplace with the latest resume and job description
+            workplace = WorkplaceModel.create_workplace(
+                user_id=user['id'],
+                resume_id=latest_data['resume']['id'],
+                job_description_id=latest_data['job_description']['id'],
+                name=workplace_name,
+                description=workplace_description
+            )
+            
+            if not workplace:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Failed to create analysis session'
+                }), 500
         
         # Prepare resume and job data for gap analysis
         try:
@@ -762,6 +877,19 @@ def generate_analysis():
                 'gap_analysis': gap_analysis_result['analysis'],
                 'analysis_timestamp': datetime.now().isoformat()
             })
+            
+            # Create AI suggestions from the analysis data
+            try:
+                create_suggestions_from_analysis(
+                    user_id=user['id'],
+                    analysis_data=gap_analysis_result['analysis'],
+                    resume_id=latest_data['resume']['id'],
+                    job_description_id=latest_data['job_description']['id']
+                )
+                logger.info(f"Created AI suggestions for user {user['id']}")
+            except Exception as suggestion_error:
+                logger.error(f"Failed to create AI suggestions: {suggestion_error}")
+                # Don't fail the entire request if suggestions fail
         
         # Return workplace data with resume and job description info
         response_data = {
@@ -791,7 +919,7 @@ def generate_analysis():
             'message': f'Failed to generate analysis: {str(e)}'
         }), 500
 
-# ✅ Get user's workplaces
+#   Get user's workplaces
 @api_bp.route('/workplaces', methods=['GET'])
 def get_user_workplaces():
     """
@@ -829,7 +957,138 @@ def get_user_workplaces():
             'message': f'Failed to get workplaces: {str(e)}'
         }), 500
 
-# ✅ Get specific workplace with full data
+#   Create a new workplace
+@api_bp.route('/workplaces', methods=['POST'])
+def create_workplace():
+    """
+    Create a new workplace (workspace) for the authenticated user
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get request data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Request data required'
+            }), 400
+        
+        workplace_name = data.get('name', f'Analysis Session - {datetime.now().strftime("%Y-%m-%d %H:%M")}')
+        workplace_description = data.get('description', f'Workspace for {workplace_name}')
+        
+        # Create workplace without resume and job description initially
+        workplace = WorkplaceModel.create_workplace(
+            user_id=user['id'],
+            name=workplace_name,
+            description=workplace_description
+        )
+        
+        if not workplace:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to create workspace'
+            }), 500
+        
+        return jsonify({
+            'status': 'success',
+            'workplace': workplace,
+            'message': 'Workspace created successfully'
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"Create workplace error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to create workspace: {str(e)}'
+        }), 500
+
+#   Update workplace with resume and job description
+@api_bp.route('/workplaces/<int:workplace_id>', methods=['PUT'])
+def update_workplace(workplace_id):
+    """
+    Update an existing workplace with resume and job description data
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get request data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Request data required'
+            }), 400
+        
+        # Verify workplace belongs to user
+        workplace = WorkplaceModel.get_workplace_by_id(workplace_id)
+        if not workplace or workplace['user_id'] != user['id']:
+            return jsonify({
+                'status': 'error',
+                'message': 'Workplace not found or access denied'
+            }), 404
+        
+        # Update workplace with new data
+        update_data = {}
+        if 'resume_id' in data:
+            update_data['resume_id'] = data['resume_id']
+        if 'job_description_id' in data:
+            update_data['job_description_id'] = data['job_description_id']
+        if 'name' in data:
+            update_data['name'] = data['name']
+        if 'description' in data:
+            update_data['description'] = data['description']
+        
+        if update_data:
+            updated_workplace = WorkplaceModel.update_workplace(workplace_id, **update_data)
+            if not updated_workplace:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Failed to update workspace'
+                }), 500
+        
+        return jsonify({
+            'status': 'success',
+            'workplace': updated_workplace if update_data else workplace,
+            'message': 'Workspace updated successfully'
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Update workplace error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to update workspace: {str(e)}'
+        }), 500
+
+#   Get specific workplace with full data
 @api_bp.route('/workplaces/<int:workplace_id>', methods=['GET'])
 def get_workplace(workplace_id):
     """
@@ -916,27 +1175,28 @@ def skill_gap_analysis():
 def create_roadmap():
     try:
         # Get input data from request
-        # data = request.get_json()
+        data = request.get_json()
 
-        # auth_header = request.headers.get('Authorization')
-        # if not auth_header or not auth_header.startswith('Bearer '):
-        #     return jsonify({
-        #         'status': 'error',
-        #         'message': 'Authorization token required'
-        #     }), 401
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
             
-        # session_token = auth_header.split(' ')[1]
-        # user = UserModel.validate_session(session_token)
-        # if not user:
-        #     return jsonify({
-        #         'status': 'error',
-        #         'message': 'Invalid or expired session'
-        #     }), 401
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
         
+        duration = data.get('duration', 14)
         # Create the study plan using the roadmap agent
         try:
         # ... your code that calls create_study_plan() ...
-            study_plan = create_study_plan()
+            study_plan = create_study_plan(duration, user['id'])
         except Exception as e:
             # This is likely what you have now:
             logger.error(f"Error creating roadmap: {e}")

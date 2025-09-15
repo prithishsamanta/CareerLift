@@ -9,6 +9,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from models.ai_suggestion_model import AISuggestionModel
+
 load_dotenv()
 
 # Make sure your GOOGLE_API_KEY is set as an environment variable
@@ -28,7 +30,7 @@ class StudyPlan(BaseModel):
     plan: List[StudyTopic] = Field(description="The list of study topics.")
 
 
-def create_study_plan() -> dict:
+def create_study_plan(duration, user_id) -> dict:
     """
     Generates a structured study plan based on resume analysis and a duration.
 
@@ -45,49 +47,56 @@ def create_study_plan() -> dict:
     # current_dir = Path(__file__).parent.parent
     # prompts_dir = os.path.join(current_dir, "prompts")
 
-    sample_analysis = """{
-  "summary": "The candidate demonstrates a strong aptitude for backend development but needs to enhance their skills in modern cloud infrastructure and advanced database management to progress to a senior level.",
-  "skillsToImprove": [
-    {
-      "name": "Cloud Infrastructure Management (AWS)",
-      "current": 30,
-      "target": 75,
-      "urgency": "High",
-      "suggestion": "Complete the AWS Certified Solutions Architect - Associate certification and deploy a personal project using EC2, S3, and Lambda."
-    },
-    {
-      "name": "Advanced SQL Querying",
-      "current": 50,
-      "target": 85,
-      "urgency": "Medium",
-      "suggestion": "Practice complex queries involving window functions and common table expressions (CTEs) on platforms like LeetCode or HackerRank."
-    },
-    {
-      "name": "Containerization with Docker & Kubernetes",
-      "current": 25,
-      "target": 70,
-      "urgency": "High",
-      "suggestion": "Containerize an existing application with Docker and create a Kubernetes manifest to manage its deployment and scaling."
-    }
-  ],
-  "strengths": [
-    "Python Programming (Django)",
-    "REST API Design"
-  ],
-  "recommendations": [
-    "Focus on obtaining the AWS certification within the next quarter.",
-    "Incorporate Docker into your current development workflow immediately."
-  ],
-  "suggestions": [
-    "Join a study group for cloud certifications.",
-    "Contribute to open-source projects that utilize Kubernetes."
-  ],
-  "conclusion": "This candidate is a solid developer with significant potential. Addressing the outlined skill gaps in cloud and containerization will be critical for their career advancement and ability to contribute to scalable projects."
-}
-"""
-    
+#     sample_analysis = """{
+#   "summary": "The candidate demonstrates a strong aptitude for backend development but needs to enhance their skills in modern cloud infrastructure and advanced database management to progress to a senior level.",
+#   "skillsToImprove": [
+#     {
+#       "name": "Cloud Infrastructure Management (AWS)",
+#       "current": 30,
+#       "target": 75,
+#       "urgency": "High",
+#       "suggestion": "Complete the AWS Certified Solutions Architect - Associate certification and deploy a personal project using EC2, S3, and Lambda."
+#     },
+#     {
+#       "name": "Advanced SQL Querying",
+#       "current": 50,
+#       "target": 85,
+#       "urgency": "Medium",
+#       "suggestion": "Practice complex queries involving window functions and common table expressions (CTEs) on platforms like LeetCode or HackerRank."
+#     },
+#     {
+#       "name": "Containerization with Docker & Kubernetes",
+#       "current": 25,
+#       "target": 70,
+#       "urgency": "High",
+#       "suggestion": "Containerize an existing application with Docker and create a Kubernetes manifest to manage its deployment and scaling."
+#     }
+#   ],
+#   "strengths": [
+#     "Python Programming (Django)",
+#     "REST API Design"
+#   ],
+#   "recommendations": [
+#     "Focus on obtaining the AWS certification within the next quarter.",
+#     "Incorporate Docker into your current development workflow immediately."
+#   ],
+#   "suggestions": [
+#     "Join a study group for cloud certifications.",
+#     "Contribute to open-source projects that utilize Kubernetes."
+#   ],
+#   "conclusion": "This candidate is a solid developer with significant potential. Addressing the outlined skill gaps in cloud and containerization will be critical for their career advancement and ability to contribute to scalable projects."
+# }
+# """
+
+    print("User_id:", user_id)
+    user_suggestions = AISuggestionModel.get_suggestions_by_user(user_id)
+
+    print(user_suggestions)
+
+    suggestions_text = "\n".join([f"- {s['title']}: {s['content']}" for s in user_suggestions]) if user_suggestions else "No specific suggestions provided."
+    print(suggestions_text)
     # Specify the desired duration
-    study_duration = "14 days"
+    study_duration = duration
     
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.5, google_api_key = os.getenv("API_KEY"))
     structured_llm = llm.with_structured_output(StudyPlan)
@@ -106,7 +115,7 @@ def create_study_plan() -> dict:
         ("human",
          """
          Please create a study plan for me based on the following resume analysis.
-         I want to complete this plan in {duration}.
+         I want to complete this plan in {duration}. Make sure that the plan follows consecutive days.
 
          Resume Analysis:
          "{resume_analysis}"
@@ -120,7 +129,7 @@ def create_study_plan() -> dict:
     chain = prompt | structured_llm
     
     response = chain.invoke({
-        "resume_analysis": sample_analysis,
+        "resume_analysis": suggestions_text,
         "duration": study_duration,
         "today_date": date.today().isoformat()
     })
