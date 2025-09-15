@@ -419,6 +419,31 @@ const TrackerPage: React.FC = () => {
     return dailyTasks[today] || [];
   };
 
+  const getTomorrowTasks = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = formatDate(tomorrow);
+    return dailyTasks[tomorrowStr] || [];
+  };
+
+  const getNextDaysTasks = () => {
+    const nextDays = [];
+    for (let i = 1; i <= 3; i++) {
+      const nextDay = new Date();
+      nextDay.setDate(nextDay.getDate() + i);
+      const nextDayStr = formatDate(nextDay);
+      const tasks = dailyTasks[nextDayStr] || [];
+      if (tasks.length > 0) {
+        nextDays.push({
+          date: nextDayStr,
+          dateLabel: i === 1 ? 'Tomorrow' : i === 2 ? 'Day After Tomorrow' : `${i} Days Ahead`,
+          tasks: tasks
+        });
+      }
+    }
+    return nextDays;
+  };
+
   return (
     <Box className="tracker-page">
       {/* Use consistent Header component */}
@@ -427,7 +452,7 @@ const TrackerPage: React.FC = () => {
       <Container maxWidth="xl" className="main-content">
         {/* View Mode Toggle */}
         <Box display="flex" justifyContent="center" mb={4}>
-          <Box className="view-toggle">
+          <Box className="view-toggle" sx={{ position: 'relative', overflow: 'visible' }}>
             <Button
               variant={viewMode === 'calendar' ? 'contained' : 'outlined'}
               onClick={() => setViewMode('calendar')}
@@ -452,7 +477,34 @@ const TrackerPage: React.FC = () => {
               onChange={(e) => setDuration(parseInt(e.target.value, 10))}
               variant="outlined"
               size="small"
-              sx={{ width: '150px' }}
+              className="duration-field"
+              sx={{ 
+                width: '150px',
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  '& fieldset': {
+                    borderColor: 'transparent',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#cbd5e0',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#3182ce',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#4a5568',
+                  fontSize: '0.75rem',
+                  whiteSpace: 'nowrap',
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#3182ce',
+                },
+                '& .MuiInputLabel-shrink': {
+                  transform: 'translate(14px, -9px) scale(0.75)',
+                },
+              }}
             />
             <Button
               variant="outlined"
@@ -570,6 +622,41 @@ const TrackerPage: React.FC = () => {
                       </ListItem>
                     )}
                   </List>
+
+                  {/* Next 3 Days Tasks Section */}
+                  {getNextDaysTasks().map((dayData, dayIndex) => (
+                    <React.Fragment key={dayData.date}>
+                      <Divider sx={{ my: 2 }} />
+                      <Typography variant="h6" className="list-title" gutterBottom sx={{ mt: 2 }}>
+                        <Assignment sx={{ mr: 1 }} />
+                        {dayData.dateLabel}'s Tasks
+                      </Typography>
+                      <List>
+                        {dayData.tasks.map((task: any) => (
+                          <ListItem key={`${dayData.date}-${task.id}`} className="task-item">
+                            <ListItemIcon>
+                              <Checkbox
+                                checked={task.completed}
+                                onChange={() => handleTaskToggle(task.id)}
+                                color="primary"
+                                disabled
+                              />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={task.task}
+                              secondary={`Skill: ${task.skill}`}
+                              className={task.completed ? 'completed-task' : ''}
+                            />
+                            <Chip
+                              label={task.priority}
+                              color={getPriorityColor(task.priority) as any}
+                              size="small"
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </React.Fragment>
+                  ))}
                 </CardContent>
               </Card>
             )}
