@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS ai_suggestions (
     user_id BIGINT NOT NULL,
     resume_id BIGINT,
     job_description_id BIGINT,
-    suggestion_type ENUM('skill_gap', 'career_advice', 'resume_improvement', 'job_match', 'interview_prep') NOT NULL,
+    suggestion_type ENUM('skill_gap', 'career_advice', 'resume_improvement', 'job_match', 'interview_prep', 'skills_to_improve', 'strengths', 'recommendations', 'suggestions', 'summary', 'conclusion') NOT NULL,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     priority ENUM('low', 'medium', 'high') DEFAULT 'medium',

@@ -9,11 +9,8 @@ const ExtractPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     
-    // Workspace name from navigation state
-    const [workspaceName, setWorkspaceName] = useState<string>('');
-    const [workspaceDescription, setWorkspaceDescription] = useState<string>('');
-    const [isTemporary, setIsTemporary] = useState<boolean>(false);
-    const [tempWorkspaceId, setTempWorkspaceId] = useState<number | null>(null);
+    // Workspace info from navigation state
+    const [workspace, setWorkspace] = useState<any>(null);
     
     // State to manage the file upload progress and status
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -35,13 +32,10 @@ const ExtractPage = () => {
     // useRef hook with a generic type to specify the element type
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Get workspace name from navigation state
+    // Get workspace info from navigation state
     useEffect(() => {
-        if (location.state) {
-            setWorkspaceName(location.state.workspaceName || '');
-            setWorkspaceDescription(location.state.workspaceDescription || '');
-            setIsTemporary(location.state.isTemporary || false);
-            setTempWorkspaceId(location.state.tempWorkspaceId || null);
+        if (location.state && location.state.workspace) {
+            setWorkspace(location.state.workspace);
         }
     }, [location.state]);
 
@@ -51,6 +45,7 @@ const ExtractPage = () => {
         if (file) {
             setUploadStatus('');
             setUploadProgress(0);
+            setAnalysisStatus(''); // Clear any previous error status
 
             try {
                 const data = await apiService.uploadResume(file);
@@ -89,6 +84,7 @@ const ExtractPage = () => {
 
         setIsProcessingJD(true);
         setJdProcessStatus('Processing job description...');
+        setAnalysisStatus(''); // Clear any previous error status
 
         try {
             const data = await apiService.parseJobDescription({
@@ -118,30 +114,33 @@ const ExtractPage = () => {
             return;
         }
 
+        if (!workspace) {
+            setAnalysisStatus('No workspace selected. Please go back and select a workspace.');
+            return;
+        }
+
         setIsGeneratingAnalysis(true);
         setAnalysisStatus('Generating analysis...');
 
         try {
+            // First, update the workspace with the resume and job description IDs
+            const updateData: any = {};
+            if (resumeData.id) updateData.resume_id = resumeData.id;
+            if (jobData.id) updateData.job_description_id = jobData.id;
+            
+            if (Object.keys(updateData).length > 0) {
+                await apiService.updateWorkplace(workspace.id, updateData);
+            }
+            
+            // Then generate the analysis
             const data = await apiService.generateAnalysis({
-                name: workspaceName || `Analysis - ${new Date().toLocaleString()}`,
-                description: workspaceDescription || 'Generated from ExtractPage'
+                name: workspace.name,
+                description: workspace.description,
+                workplace_id: workspace.id
             });
             
             setAnalysisStatus('Analysis generated successfully!');
             
-            // Clean up temporary workspace if this was a temporary workspace
-            if (isTemporary && tempWorkspaceId) {
-                const savedWorkspaces = localStorage.getItem('tempWorkspaces');
-                if (savedWorkspaces) {
-                    try {
-                        const tempWorkspaces = JSON.parse(savedWorkspaces);
-                        const updatedTempWorkspaces = tempWorkspaces.filter((w: any) => w.id !== tempWorkspaceId);
-                        localStorage.setItem('tempWorkspaces', JSON.stringify(updatedTempWorkspaces));
-                    } catch (error) {
-                        console.error('Error cleaning up temporary workspace:', error);
-                    }
-                }
-            }
             
             // Navigate to analysis page after successful generation
             setTimeout(() => {
@@ -337,7 +336,10 @@ const ExtractPage = () => {
                                 placeholder="Enter the job description text here..." 
                                 className="form-textarea"
                                 value={jobDescription}
-                                onChange={e => setJobDescription(e.target.value)}
+                                onChange={e => {
+                                    setJobDescription(e.target.value);
+                                    setAnalysisStatus(''); // Clear error status when user types
+                                }}
                             ></textarea>
                         </div>
 

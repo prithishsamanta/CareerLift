@@ -66,7 +66,7 @@ const Header: React.FC = () => {
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
       <Typography variant="h6" sx={{ my: 2 }}>
-        Skill Master
+        CareerLift
       </Typography>
       <List>
         {navItems.map((item) => (
@@ -127,7 +127,7 @@ const Header: React.FC = () => {
               display="flex"
               alignItems="center"
               sx={{ cursor: "pointer" }}
-              onClick={() => handleNavigation("/")}
+              onClick={() => handleNavigation("/home")}
             >
               <Typography
                 variant="h5"
@@ -140,7 +140,7 @@ const Header: React.FC = () => {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                Skill Master
+                CareerLift
               </Typography>
             </Box>
 
