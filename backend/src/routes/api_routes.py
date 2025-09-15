@@ -707,20 +707,38 @@ def generate_analysis():
                 'message': 'No job description found. Please add a job description first.'
             }), 400
         
-        # Create workplace with the latest resume and job description
-        workplace = WorkplaceModel.create_workplace(
-            user_id=user['id'],
-            resume_id=latest_data['resume']['id'],
-            job_description_id=latest_data['job_description']['id'],
-            name=workplace_name,
-            description=workplace_description
-        )
+        # Check if we should update an existing workplace or create a new one
+        workplace = None
+        workplace_id = data.get('workplace_id')
         
-        if not workplace:
-            return jsonify({
-                'status': 'error',
-                'message': 'Failed to create analysis session'
-            }), 500
+        if workplace_id:
+            # Update existing workplace
+            workplace = WorkplaceModel.update_workplace(
+                workplace_id,
+                resume_id=latest_data['resume']['id'],
+                job_description_id=latest_data['job_description']['id']
+            )
+            
+            if not workplace:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Failed to update workspace'
+                }), 500
+        else:
+            # Create new workplace with the latest resume and job description
+            workplace = WorkplaceModel.create_workplace(
+                user_id=user['id'],
+                resume_id=latest_data['resume']['id'],
+                job_description_id=latest_data['job_description']['id'],
+                name=workplace_name,
+                description=workplace_description
+            )
+            
+            if not workplace:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Failed to create analysis session'
+                }), 500
         
         # Prepare resume and job data for gap analysis
         try:
@@ -826,6 +844,137 @@ def get_user_workplaces():
         return jsonify({
             'status': 'error',
             'message': f'Failed to get workplaces: {str(e)}'
+        }), 500
+
+#   Create a new workplace
+@api_bp.route('/workplaces', methods=['POST'])
+def create_workplace():
+    """
+    Create a new workplace (workspace) for the authenticated user
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get request data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Request data required'
+            }), 400
+        
+        workplace_name = data.get('name', f'Analysis Session - {datetime.now().strftime("%Y-%m-%d %H:%M")}')
+        workplace_description = data.get('description', f'Workspace for {workplace_name}')
+        
+        # Create workplace without resume and job description initially
+        workplace = WorkplaceModel.create_workplace(
+            user_id=user['id'],
+            name=workplace_name,
+            description=workplace_description
+        )
+        
+        if not workplace:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to create workspace'
+            }), 500
+        
+        return jsonify({
+            'status': 'success',
+            'workplace': workplace,
+            'message': 'Workspace created successfully'
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"Create workplace error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to create workspace: {str(e)}'
+        }), 500
+
+#   Update workplace with resume and job description
+@api_bp.route('/workplaces/<int:workplace_id>', methods=['PUT'])
+def update_workplace(workplace_id):
+    """
+    Update an existing workplace with resume and job description data
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get request data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Request data required'
+            }), 400
+        
+        # Verify workplace belongs to user
+        workplace = WorkplaceModel.get_workplace_by_id(workplace_id)
+        if not workplace or workplace['user_id'] != user['id']:
+            return jsonify({
+                'status': 'error',
+                'message': 'Workplace not found or access denied'
+            }), 404
+        
+        # Update workplace with new data
+        update_data = {}
+        if 'resume_id' in data:
+            update_data['resume_id'] = data['resume_id']
+        if 'job_description_id' in data:
+            update_data['job_description_id'] = data['job_description_id']
+        if 'name' in data:
+            update_data['name'] = data['name']
+        if 'description' in data:
+            update_data['description'] = data['description']
+        
+        if update_data:
+            updated_workplace = WorkplaceModel.update_workplace(workplace_id, **update_data)
+            if not updated_workplace:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Failed to update workspace'
+                }), 500
+        
+        return jsonify({
+            'status': 'success',
+            'workplace': updated_workplace if update_data else workplace,
+            'message': 'Workspace updated successfully'
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Update workplace error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to update workspace: {str(e)}'
         }), 500
 
 #   Get specific workplace with full data
