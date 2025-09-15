@@ -36,6 +36,7 @@ interface Workspace {
   resume_filename?: string;
   job_title?: string;
   job_company?: string;
+  analysis_data?: any;
 }
 
 const HomePage: React.FC = () => {
@@ -73,23 +74,7 @@ const HomePage: React.FC = () => {
       const response = await apiService.getWorkplaces();
       const backendWorkspaces = response.workplaces || [];
       
-      // Load temporary workspaces from localStorage
-      const savedWorkspaces = localStorage.getItem('tempWorkspaces');
-      let tempWorkspaces: Workspace[] = [];
-      
-      if (savedWorkspaces) {
-        try {
-          tempWorkspaces = JSON.parse(savedWorkspaces);
-        } catch (error) {
-          console.error('Error parsing saved workspaces:', error);
-        }
-      }
-      
-      // Merge backend and temporary workspaces, avoiding duplicates by name
-      const backendNames = new Set(backendWorkspaces.map((w: Workspace) => w.name.toLowerCase()));
-      const uniqueTempWorkspaces = tempWorkspaces.filter((w: Workspace) => !backendNames.has(w.name.toLowerCase()));
-      const allWorkspaces = [...backendWorkspaces, ...uniqueTempWorkspaces];
-      setWorkspaces(allWorkspaces);
+      setWorkspaces(backendWorkspaces);
       
     } catch (error: any) {
       console.error('Error loading workplaces:', error);
@@ -136,29 +121,35 @@ const HomePage: React.FC = () => {
     }
 
     try {
-      // Create a temporary workspace object and add it to the list
-      const newWorkspace: Workspace = {
-        id: Date.now(), // Temporary ID
+      // Create workspace in database immediately
+      const response = await apiService.createWorkplace({
         name: newWorkspaceName.trim(),
-        description: `Workspace for ${newWorkspaceName.trim()}`,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+        description: `Workspace for ${newWorkspaceName.trim()}`
+      });
 
-      // Add to the list immediately for better UX
-      const updatedWorkspaces = [newWorkspace, ...workspaces];
-      setWorkspaces(updatedWorkspaces);
-      
-      // Save to localStorage for persistence
-      const tempWorkspaces = updatedWorkspaces.filter(w => typeof w.id === 'number' && w.id > 1000000000000);
-      localStorage.setItem('tempWorkspaces', JSON.stringify(tempWorkspaces));
-      
-      setNewWorkspaceName("");
-      setWorkspaceNameError(null);
-      setCreateDialogOpen(false);
-      
-      // The actual workspace will be created in the database when analysis is generated
-      // For now, we just show it in the UI
+      if (response.status === 'success') {
+        const newWorkspace: Workspace = {
+          id: response.workplace.id,
+          name: response.workplace.name,
+          description: response.workplace.description,
+          created_at: response.workplace.created_at,
+          updated_at: response.workplace.updated_at,
+          resume_filename: undefined,
+          job_title: undefined,
+          job_company: undefined,
+          analysis_data: undefined
+        };
+
+        // Add to the list immediately for better UX
+        const updatedWorkspaces = [newWorkspace, ...workspaces];
+        setWorkspaces(updatedWorkspaces);
+        
+        setNewWorkspaceName("");
+        setWorkspaceNameError(null);
+        setCreateDialogOpen(false);
+      } else {
+        setError(response.message || 'Failed to create workspace');
+      }
     } catch (error: any) {
       console.error('Error creating workspace:', error);
       setError(error.message || 'Failed to create workspace');
@@ -166,25 +157,28 @@ const HomePage: React.FC = () => {
   };
 
   const handleWorkspaceClick = (workspace: Workspace) => {
-    // Navigate to Analysis page with workspace context
-    navigate("/analysis", { 
-      state: { 
-        workspace,
-        isTemporary: typeof workspace.id === 'number' && workspace.id > 1000000000000,
-        tempWorkspaceId: typeof workspace.id === 'number' && workspace.id > 1000000000000 ? workspace.id : null
-      } 
-    });
+    // Check if workspace has analysis data
+    if (workspace.analysis_data) {
+      // Navigate to Analysis page with existing analysis data
+      navigate("/analysis", { 
+        state: { 
+          workspace,
+          gapAnalysis: {
+            status: 'success',
+            analysis: workspace.analysis_data
+          }
+        } 
+      });
+    } else {
+      // Navigate to Analysis page without analysis data (will show upload prompt)
+      navigate("/analysis", { 
+        state: { 
+          workspace
+        } 
+      });
+    }
   };
 
-  // Function to clean up temporary workspace when it becomes a real workspace
-  const cleanupTempWorkspace = (tempWorkspaceId: number) => {
-    setWorkspaces(prevWorkspaces => {
-      const updated = prevWorkspaces.filter(w => w.id !== tempWorkspaceId);
-      const tempWorkspaces = updated.filter(w => typeof w.id === 'number' && w.id > 1000000000000);
-      localStorage.setItem('tempWorkspaces', JSON.stringify(tempWorkspaces));
-      return updated;
-    });
-  };
 
   // Function to refresh workspaces (useful when coming back from analysis)
   const refreshWorkspaces = () => {
@@ -221,6 +215,24 @@ const HomePage: React.FC = () => {
         day: "numeric",
         year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined
       });
+    }
+  };
+
+  const getWorkspaceTimestamp = (workspace: Workspace) => {
+    // If workspace has analysis data, it has been updated - show updated time
+    if (workspace.analysis_data) {
+      return {
+        label: "Updated",
+        time: workspace.updated_at,
+        color: '#6b7280'
+      };
+    } else {
+      // If no analysis data, show created time
+      return {
+        label: "Created",
+        time: workspace.created_at,
+        color: '#6b7280'
+      };
     }
   };
 
@@ -330,35 +342,84 @@ const HomePage: React.FC = () => {
                           color: '#1f2937',
                           fontSize: '1rem',
                           lineHeight: 1.3,
-                          mb: 1.5,
+                          mb: 1,
                           wordBreak: 'break-word'
                         }}
                       >
                         {workspace.name}
                       </Typography>
                       
+                      {/* Analysis Status Indicator */}
+                      {workspace.analysis_data ? (
+                        <Box
+                          sx={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: '12px',
+                            backgroundColor: '#dcfce7',
+                            color: '#166534',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            mb: 1.5
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: '50%',
+                              backgroundColor: '#22c55e'
+                            }}
+                          />
+                          Analysis Complete
+                        </Box>
+                      ) : (
+                        <Box
+                          sx={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: '12px',
+                            backgroundColor: '#fef3c7',
+                            color: '#92400e',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            mb: 1.5
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: '50%',
+                              backgroundColor: '#f59e0b'
+                            }}
+                          />
+                          Ready to Analyze
+                        </Box>
+                      )}
+                      
                       <Box className="workspace-timestamps">
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            color: '#6b7280',
-                            fontSize: '0.75rem',
-                            lineHeight: 1.2,
-                            mb: 0.25
-                          }}
-                        >
-                          Updated: {formatDateTime(workspace.updated_at)}
-                        </Typography>
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            color: '#9ca3af',
-                            fontSize: '0.75rem',
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Created: {formatDateTime(workspace.created_at)}
-                        </Typography>
+                        {(() => {
+                          const timestamp = getWorkspaceTimestamp(workspace);
+                          return (
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                color: timestamp.color,
+                                fontSize: '0.75rem',
+                                lineHeight: 1.2
+                              }}
+                            >
+                              {timestamp.label}: {formatDateTime(timestamp.time)}
+                            </Typography>
+                          );
+                        })()}
                       </Box>
                     </CardContent>
                   </Card>

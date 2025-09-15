@@ -78,9 +78,18 @@ const LoginPage: React.FC = () => {
       <Box className="header-section">
         <Container maxWidth="lg">
           <Box py={3}>
-            <Typography variant="h4" className="page-title">
-              <LoginIcon sx={{ mr: 2, color: '#3b82f6' }} />
-              Log In to Resume Tracker
+            <Typography 
+              variant="h4" 
+              className="page-title"
+              sx={{
+                fontWeight: 800,
+                background: "linear-gradient(45deg, #3182ce, #2c5aa0)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              CareerLift
             </Typography>
           </Box>
         </Container>
@@ -97,7 +106,7 @@ const LoginPage: React.FC = () => {
 
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Log in to access your resume tracking dashboard
+                Log in to access your learning dashboard
               </Typography>
             </Box>
 
