@@ -150,7 +150,7 @@ class ApiService {
   }
 
   // Analysis endpoints
-  async generateAnalysis(data?: { name?: string; description?: string }) {
+  async generateAnalysis(data?: { name?: string; description?: string; workplace_id?: number }) {
     const response = await fetch(`${API_BASE_URL}/analysis/generate`, {
       method: "POST",
       headers: this.getAuthHeaders(),
@@ -171,6 +171,29 @@ class ApiService {
     const response = await fetch(`${API_BASE_URL}/workplaces/${workplaceId}`, {
       method: "GET",
       headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  }
+
+  async createWorkplace(data: { name: string; description?: string }) {
+    const response = await fetch(`${API_BASE_URL}/workplaces`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return this.handleResponse(response);
+  }
+
+  async updateWorkplace(workplaceId: number, data: { 
+    resume_id?: number; 
+    job_description_id?: number; 
+    name?: string; 
+    description?: string; 
+  }) {
+    const response = await fetch(`${API_BASE_URL}/workplaces/${workplaceId}`, {
+      method: "PUT",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
     });
     return this.handleResponse(response);
   }
