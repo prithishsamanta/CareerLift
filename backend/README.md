@@ -13,11 +13,13 @@ A TypeScript-based Express.js backend server for the TiDB hackathon project.
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Copy environment variables:
+
 ```bash
 cp .env.example .env
 ```
@@ -27,6 +29,7 @@ cp .env.example .env
 ### Development
 
 Start the development server with hot reload:
+
 ```bash
 npm run dev
 ```
@@ -36,11 +39,13 @@ The server will start on `http://localhost:3000` (or your configured PORT).
 ### Production
 
 Build the project:
+
 ```bash
 npm run build
 ```
 
 Start the production server:
+
 ```bash
 npm start
 ```
