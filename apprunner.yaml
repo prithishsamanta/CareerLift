@@ -1,0 +1,40 @@
+version: 1.0
+runtime: docker
+build:
+  commands:
+    build:
+      - echo "Building application..."
+      - echo "Build completed"
+run:
+  runtime-version: latest
+  command: /start.sh
+  network:
+    port: 80
+    env: PORT
+  env:
+    - name: PORT
+      value: "80"
+    - name: FLASK_ENV
+      value: "production"
+    - name: TIDB_HOST
+      value: "gateway01.us-east-1.prod.aws.tidbcloud.com"
+    - name: TIDB_PORT
+      value: "4000"
+    - name: TIDB_USER
+      value: "43npE9JtA4bEUeS.root"
+    - name: TIDB_PASSWORD
+      value: "ql0Af5GGshl8yGmb"
+    - name: TIDB_DATABASE
+      value: "test"
+    - name: TIDB_SSL_DISABLED
+      value: "False"
+    - name: TIDB_MAX_CONNECTIONS
+      value: "10"
+    - name: TIDB_CONNECT_TIMEOUT
+      value: "10"
+    - name: TIDB_READ_TIMEOUT
+      value: "30"
+    - name: TIDB_WRITE_TIMEOUT
+      value: "30"
+    - name: GROQ_API_KEY
+      value: "your_groq_api_key_here"

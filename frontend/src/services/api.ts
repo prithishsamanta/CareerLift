@@ -1,6 +1,5 @@
 // API service for communicating with the backend
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL || "http://localhost:5001/api";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
 
 class ApiService {
   private getAuthHeaders(): HeadersInit {
@@ -151,7 +150,11 @@ class ApiService {
   }
 
   // Analysis endpoints
-  async generateAnalysis(data?: { name?: string; description?: string; workplace_id?: number }) {
+  async generateAnalysis(data?: {
+    name?: string;
+    description?: string;
+    workplace_id?: number;
+  }) {
     const response = await fetch(`${API_BASE_URL}/analysis/generate`, {
       method: "POST",
       headers: this.getAuthHeaders(),
@@ -175,9 +178,12 @@ class ApiService {
   }
 
   async getGoalByWorkplace(workplaceId: number) {
-    const response = await fetch(`${API_BASE_URL}/goals/workplace/${workplaceId}`, {
-      headers: this.getAuthHeaders(),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/goals/workplace/${workplaceId}`,
+      {
+        headers: this.getAuthHeaders(),
+      }
+    );
     return this.handleResponse(response);
   }
 
@@ -211,14 +217,21 @@ class ApiService {
     return this.handleResponse(response);
   }
 
-  async getTaskCompletions(workplaceId: number, startDate?: string, endDate?: string) {
+  async getTaskCompletions(
+    workplaceId: number,
+    startDate?: string,
+    endDate?: string
+  ) {
     const params = new URLSearchParams();
     if (startDate) params.append("start_date", startDate);
     if (endDate) params.append("end_date", endDate);
-    
-    const response = await fetch(`${API_BASE_URL}/task-completions/workplace/${workplaceId}?${params}`, {
-      headers: this.getAuthHeaders(),
-    });
+
+    const response = await fetch(
+      `${API_BASE_URL}/task-completions/workplace/${workplaceId}?${params}`,
+      {
+        headers: this.getAuthHeaders(),
+      }
+    );
     return this.handleResponse(response);
   }
 
@@ -248,7 +261,6 @@ class ApiService {
     return this.handleResponse(response);
   }
 
-
   async createWorkplace(data: { name: string; description?: string }) {
     const response = await fetch(`${API_BASE_URL}/workplaces`, {
       method: "POST",
@@ -258,12 +270,15 @@ class ApiService {
     return this.handleResponse(response);
   }
 
-  async updateWorkplace(workplaceId: number, data: { 
-    resume_id?: number; 
-    job_description_id?: number; 
-    name?: string; 
-    description?: string; 
-  }) {
+  async updateWorkplace(
+    workplaceId: number,
+    data: {
+      resume_id?: number;
+      job_description_id?: number;
+      name?: string;
+      description?: string;
+    }
+  ) {
     const response = await fetch(`${API_BASE_URL}/workplaces/${workplaceId}`, {
       method: "PUT",
       headers: this.getAuthHeaders(),
