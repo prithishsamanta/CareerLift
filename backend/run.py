@@ -14,5 +14,6 @@ if __name__ == '__main__':
     # Run the Flask application on port 5001
     import os
     port = int(os.getenv('PORT', 5001))
+    debug = os.getenv('FLASK_ENV') == 'development'
     print(f"Starting Flask on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=debug)

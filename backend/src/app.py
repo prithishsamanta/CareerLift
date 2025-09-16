@@ -11,7 +11,11 @@ load_dotenv()
 app = Flask(__name__)
 
 # Configure CORS
-CORS(app, origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"])  # Allow frontend to connect
+# Configure CORS to be flexible for deployment
+# It will use the FRONTEND_URL from your environment, or default to localhost for development.
+frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+origins = [url.strip() for url in frontend_url.split(',')]
+CORS(app, origins=origins, supports_credentials=True)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
