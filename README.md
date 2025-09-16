@@ -1,4 +1,4 @@
-# Career Development Platform
+# CareerLift
 
 A comprehensive web application that helps users analyze their career gaps, create personalized learning roadmaps, and track their progress towards professional goals.
 
