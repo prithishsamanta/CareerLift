@@ -2,7 +2,7 @@
 
 A comprehensive web application that helps users analyze their career gaps, create personalized learning roadmaps, and track their progress towards professional goals.
 
-Functioning Link: https://w3qk3yvwxp.us-east-1.awsapprunner.com/
+Link to the Project: https://w3qk3yvwxp.us-east-1.awsapprunner.com/
 
 ## Overview
 
