@@ -57,18 +57,18 @@ const AnalysisPage: React.FC = () => {
       // Check for analysis data in navigation state
       if (location.state.gapAnalysis) {
         const gapAnalysis = location.state.gapAnalysis;
-        console.log('🔍 Received gapAnalysis in AnalysisPage:', gapAnalysis);
+        console.log(' Received gapAnalysis in AnalysisPage:', gapAnalysis);
         
         if (gapAnalysis && gapAnalysis.status === 'success' && gapAnalysis.analysis) {
-          console.log('✅ Setting analysis data from navigation state');
+          console.log(' Setting analysis data from navigation state');
           setAnalysisData(gapAnalysis.analysis);
         } else if (gapAnalysis && gapAnalysis.analysis) {
           // Handle case where status might not be exactly 'success'
-          console.log('✅ Setting analysis data (no status check)');
+          console.log(' Setting analysis data (no status check)');
           setAnalysisData(gapAnalysis.analysis);
         } else if (gapAnalysis) {
           // Handle case where gapAnalysis is the analysis data directly
-          console.log('✅ Setting analysis data directly');
+          console.log(' Setting analysis data directly');
           setAnalysisData(gapAnalysis);
         }
       }
@@ -98,11 +98,11 @@ const AnalysisPage: React.FC = () => {
     
     // Fallback: Handle case where we have gapAnalysis but no workspace
     if (!location.state?.workspace && location.state?.gapAnalysis) {
-      console.log('🔍 No workspace but have gapAnalysis, handling fallback');
+      console.log(' No workspace but have gapAnalysis, handling fallback');
       const gapAnalysis = location.state.gapAnalysis;
       
       if (gapAnalysis && gapAnalysis.status === 'success' && gapAnalysis.analysis) {
-        console.log('✅ Setting analysis data from fallback');
+        console.log(' Setting analysis data from fallback');
         setAnalysisData(gapAnalysis.analysis);
       } else if (gapAnalysis && gapAnalysis.analysis) {
         setAnalysisData(gapAnalysis.analysis);
@@ -500,7 +500,7 @@ const AnalysisPage: React.FC = () => {
                     </Box>
                     {skill.suggestion && (
                       <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                        💡 {skill.suggestion}
+                         {skill.suggestion}
                       </Typography>
                     )}
                   </Box>
@@ -528,7 +528,7 @@ const AnalysisPage: React.FC = () => {
 
                 {/* Recommendations */}
                 <Typography variant="h5" className="subsection-title" gutterBottom>
-                  💡 Recommendations
+                   Recommendations
                 </Typography>
                 <Box mb={3}>
                   {currentAnalysis.recommendations && currentAnalysis.recommendations.map((rec: string, index: number) => (
@@ -543,7 +543,7 @@ const AnalysisPage: React.FC = () => {
                   <>
                     <Divider sx={{ my: 3 }} />
                     <Typography variant="h5" className="subsection-title" gutterBottom>
-                      🌟 Additional Suggestions
+                       Additional Suggestions
                     </Typography>
                     <Box mb={3}>
                       {currentAnalysis.suggestions.map((suggestion: string, index: number) => (
@@ -560,7 +560,7 @@ const AnalysisPage: React.FC = () => {
                   <>
                     <Divider sx={{ my: 3 }} />
                     <Typography variant="h5" className="subsection-title" gutterBottom>
-                      🎯 Conclusion
+                       Conclusion
                     </Typography>
                     <Typography variant="body1" className="conclusion-text" paragraph sx={{ 
                       fontStyle: 'italic', 
@@ -614,7 +614,7 @@ const AnalysisPage: React.FC = () => {
               <Card className="ai-assistant-card" elevation={2} sx={{ mt: 3 }}>
                 <CardContent>
                   <Typography variant="h6" className="ai-title" gutterBottom>
-                    🤖 AI Assistant
+                     AI Assistant
                   </Typography>
                   <Typography variant="body2" color="text.secondary" paragraph>
                     Need help understanding your analysis? Chat with our AI assistant for personalized guidance.

@@ -62,15 +62,15 @@ def test_database_connection():
     """Test the database connection"""
     logger.info("Testing database connection...")
     if db_config.test_connection():
-        logger.info("✅ Database connection successful")
+        logger.info(" Database connection successful")
         return True
     else:
-        logger.error("❌ Database connection failed")
+        logger.error(" Database connection failed")
         return False
 
 def main():
     """Main initialization function"""
-    logger.info("🚀 Starting database initialization...")
+    logger.info(" Starting database initialization...")
     
     # Test connection first
     if not test_database_connection():
@@ -79,8 +79,8 @@ def main():
     
     # Execute schema
     if execute_schema():
-        logger.info("✅ Database initialization completed successfully")
-        logger.info("📊 Tables created:")
+        logger.info(" Database initialization completed successfully")
+        logger.info(" Tables created:")
         logger.info("   - users")
         logger.info("   - resumes") 
         logger.info("   - job_descriptions")
@@ -88,7 +88,7 @@ def main():
         logger.info("   - job_applications")
         logger.info("   - user_sessions")
     else:
-        logger.error("❌ Database initialization failed")
+        logger.error(" Database initialization failed")
         sys.exit(1)
 
 if __name__ == "__main__":

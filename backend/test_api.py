@@ -10,7 +10,7 @@ BASE_URL = "http://localhost:5001/api"
 
 def test_health():
     """Test health endpoint"""
-    print("🔍 Testing health endpoint...")
+    print(" Testing health endpoint...")
     try:
         response = requests.get(f"{BASE_URL}/health")
         print(f"Status: {response.status_code}")
@@ -22,7 +22,7 @@ def test_health():
 
 def test_user_registration():
     """Test user registration"""
-    print("\n🔍 Testing user registration...")
+    print("\n Testing user registration...")
     try:
         user_data = {
             "email": "test@example.com",
@@ -40,7 +40,7 @@ def test_user_registration():
 
 def test_user_login():
     """Test user login"""
-    print("\n🔍 Testing user login...")
+    print("\n Testing user login...")
     try:
         login_data = {
             "email": "test@example.com",

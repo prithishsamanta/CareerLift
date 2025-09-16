@@ -330,7 +330,7 @@ const UploadPage: React.FC = () => {
                   <Box className="parsed-content" mt={3}>
                     <Divider sx={{ my: 2 }} />
                     <Typography variant="h6" className="parsed-title" gutterBottom>
-                      📄 Resume Summary
+                       Resume Summary
                     </Typography>
                     <Box className="summary-box">
                       {resumeParsed.summary.map((item, index) => (
@@ -409,7 +409,7 @@ const UploadPage: React.FC = () => {
                   <Box className="parsed-content" mt={3}>
                     <Divider sx={{ my: 2 }} />
                     <Typography variant="h6" className="parsed-title" gutterBottom>
-                      💼 Job Requirements Summary
+                       Job Requirements Summary
                     </Typography>
                     <Box className="summary-box">
                       {jobDescParsed.summary.map((item, index) => (
@@ -449,7 +449,7 @@ const UploadPage: React.FC = () => {
           <Box display="flex" justifyContent="center" mb={4}>
             <Alert severity="success" className="ready-alert">
               <Typography variant="body1">
-                🎉 Ready for analysis! Your resume and job description have been processed successfully.
+                 Ready for analysis! Your resume and job description have been processed successfully.
               </Typography>
             </Alert>
           </Box>

@@ -2,7 +2,7 @@
 
 A TypeScript-based Express.js backend server for the TiDB hackathon project.
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -45,7 +45,7 @@ Start the production server:
 npm start
 ```
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 src/
@@ -59,7 +59,7 @@ src/
 └── utils/          # Utility functions
 ```
 
-## 🛠 Available Scripts
+##  Available Scripts
 
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build TypeScript to JavaScript
@@ -67,7 +67,7 @@ src/
 - `npm run lint` - Check TypeScript types
 - `npm run clean` - Remove build directory
 
-## 📡 API Endpoints
+##  API Endpoints
 
 ### Base URL: `http://localhost:3000`
 
@@ -76,7 +76,7 @@ src/
 - `GET /api/status` - API status information
 - `GET /api/tidb-info` - TiDB connection information
 
-## 🗄️ TiDB Integration
+##  TiDB Integration
 
 This project is set up to work with TiDB. Connection configuration should be added to your `.env` file:
 
@@ -88,11 +88,11 @@ TIDB_USERNAME=your-username
 TIDB_PASSWORD=your-password
 ```
 
-## 🔧 Configuration
+##  Configuration
 
 The application uses environment variables for configuration. See `.env.example` for all available options.
 
-## 📝 Development Notes
+##  Development Notes
 
 - TypeScript strict mode is enabled for better code quality
 - CORS is configured for cross-origin requests

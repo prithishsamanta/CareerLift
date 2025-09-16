@@ -239,12 +239,12 @@ const ExtractPage = () => {
                         {/* Resume Data Display */}
                         {resumeData && (
                             <div className="parsed-data-container">
-                                <h4 className="section-title">📄 Parsed Resume Data</h4>
+                                <h4 className="section-title"> Parsed Resume Data</h4>
                                 
                                 {/* Skills Section */}
                                 {resumeData.skills && resumeData.skills.length > 0 && (
                                     <div className="data-section">
-                                        <h5 className="subsection-title">🛠️ Skills</h5>
+                                        <h5 className="subsection-title"> Skills</h5>
                                         <div className="skills-container">
                                             {resumeData.skills.map((skill: string, index: number) => (
                                                 <span key={index} className="skill-tag">{skill}</span>
@@ -256,7 +256,7 @@ const ExtractPage = () => {
                                 {/* Work Experience Section */}
                                 {resumeData.work_experience && resumeData.work_experience.length > 0 && (
                                     <div className="data-section">
-                                        <h5 className="subsection-title">💼 Work Experience</h5>
+                                        <h5 className="subsection-title"> Work Experience</h5>
                                         {resumeData.work_experience.map((exp: any, index: number) => (
                                             <div key={index} className="experience-item">
                                                 <div className="experience-header">
@@ -272,7 +272,7 @@ const ExtractPage = () => {
                                 {/* Education Section */}
                                 {resumeData.education && resumeData.education.length > 0 && (
                                     <div className="data-section">
-                                        <h5 className="subsection-title">🎓 Education</h5>
+                                        <h5 className="subsection-title"> Education</h5>
                                         {resumeData.education.map((edu: any, index: number) => (
                                             <div key={index} className="education-item">
                                                 <div className="education-header">
@@ -289,7 +289,7 @@ const ExtractPage = () => {
                                 {/* Projects Section */}
                                 {resumeData.projects && resumeData.projects.length > 0 && (
                                     <div className="data-section">
-                                        <h5 className="subsection-title">🚀 Projects</h5>
+                                        <h5 className="subsection-title"> Projects</h5>
                                         {resumeData.projects.map((project: any, index: number) => (
                                             <div key={index} className="project-item">
                                                 <div className="project-header">
@@ -310,7 +310,7 @@ const ExtractPage = () => {
                                 {/* Error Display */}
                                 {resumeData.error && (
                                     <div className="error-section">
-                                        <h5 className="subsection-title">⚠️ Error</h5>
+                                        <h5 className="subsection-title"> Error</h5>
                                         <div className="error-message">{resumeData.error}</div>
                                     </div>
                                 )}
@@ -358,12 +358,12 @@ const ExtractPage = () => {
                         {/* Job Description Data Display */}
                         {jobData && (
                             <div className="parsed-data-container">
-                                <h4 className="section-title">🎯 Parsed Job Description</h4>
+                                <h4 className="section-title"> Parsed Job Description</h4>
                                 
                                 {/* Technical Skills Section */}
                                 {jobData.technical_skills && jobData.technical_skills.length > 0 && (
                                     <div className="data-section">
-                                        <h5 className="subsection-title">🛠️ Technical Skills Required</h5>
+                                        <h5 className="subsection-title"> Technical Skills Required</h5>
                                         <div className="skills-container">
                                             {jobData.technical_skills.map((skill: string, index: number) => (
                                                 <span key={index} className="skill-tag job-skill-tag">{skill}</span>
@@ -375,7 +375,7 @@ const ExtractPage = () => {
                                 {/* Technical Synopsis Section */}
                                 {jobData.technical_synopsis && (
                                     <div className="data-section">
-                                        <h5 className="subsection-title">📋 Technical Synopsis</h5>
+                                        <h5 className="subsection-title"> Technical Synopsis</h5>
                                         <div className="synopsis-content">
                                             {jobData.technical_synopsis}
                                         </div>
@@ -385,7 +385,7 @@ const ExtractPage = () => {
                                 {/* Error Display */}
                                 {jobData.error && (
                                     <div className="error-section">
-                                        <h5 className="subsection-title">⚠️ Error</h5>
+                                        <h5 className="subsection-title"> Error</h5>
                                         <div className="error-message">{jobData.error}</div>
                                     </div>
                                 )}

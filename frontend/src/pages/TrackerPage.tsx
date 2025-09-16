@@ -67,14 +67,14 @@ const TrackerPage: React.FC = () => {
   const loadSavedGoalsOrFetchNew = async () => {
     if (!currentWorkspace?.id) return;
     
-    console.log("🔍 Loading saved goals or fetching new roadmap for workspace:", currentWorkspace.id);
+    console.log(" Loading saved goals or fetching new roadmap for workspace:", currentWorkspace.id);
     
     try {
       setLoading(true);
       const response = await apiService.getGoalByWorkplace(currentWorkspace.id);
       
       if (response.status === 'success' && response.goal) {
-        console.log("✅ Found saved goals, loading them...");
+        console.log(" Found saved goals, loading them...");
         setSavedGoal(response.goal);
         setStudyPlan(response.goal.goal_data);
         setDuration(response.goal.duration_days || 14);
@@ -88,11 +88,11 @@ const TrackerPage: React.FC = () => {
         const tasks = convertStudyPlanToTasks(response.goal.goal_data, completions);
         setDailyTasks(tasks);
       } else {
-        console.log("⚠️ No saved goals found, fetching new roadmap...");
+        console.log(" No saved goals found, fetching new roadmap...");
         await fetchRoadmap();
       }
     } catch (error) {
-      console.error('❌ Error loading saved goals, trying to fetch new roadmap:', error);
+      console.error(' Error loading saved goals, trying to fetch new roadmap:', error);
       await fetchRoadmap();
     } finally {
       setLoading(false);
@@ -190,7 +190,7 @@ const TrackerPage: React.FC = () => {
       });
       
       // Update local state
-      setTaskCompletions(prev => ({
+      setTaskCompletions((prev: { [key: string]: { [key: string]: boolean } }) => ({
         ...prev,
         [taskDate]: {
           ...prev[taskDate],
@@ -199,10 +199,10 @@ const TrackerPage: React.FC = () => {
       }));
       
       // Update daily tasks state
-      setDailyTasks(prev => {
+      setDailyTasks((prev: { [key: string]: Array<{ id: number; task: string; skill: string; completed: boolean; priority: string }> }) => {
         const newTasks = { ...prev };
         if (newTasks[taskDate]) {
-          newTasks[taskDate] = newTasks[taskDate].map(task => 
+          newTasks[taskDate] = newTasks[taskDate].map((task: { id: number; task: string; skill: string; completed: boolean; priority: string }) => 
             task.id.toString() === taskId ? { ...task, completed: isCompleted } : task
           );
         }
@@ -265,7 +265,7 @@ const TrackerPage: React.FC = () => {
       // Check if task is completed (for now, we'll assume none are completed initially)
       const dateStr = item.date;
       const tasksForDate = dailyTasks[dateStr] || [];
-      const taskCompleted = tasksForDate.some(task => task.task === item.topic && task.completed);
+      const taskCompleted = tasksForDate.some((task: { task: string; completed: boolean }) => task.task === item.topic && task.completed);
       if (taskCompleted) {
         skillCounts[skill].completed++;
       }
@@ -288,15 +288,15 @@ const TrackerPage: React.FC = () => {
   const weeklyProgress = calculateWeeklyProgress();
 
     const fetchRoadmap = async () => {
-    console.log("🚀 Starting fetchRoadmap...", { duration, currentWorkspace });
+    console.log(" Starting fetchRoadmap...", { duration, currentWorkspace });
     try {
       // Use the centralized apiService to make the request
       const data = await apiService.getRoadMap(duration);
-      console.log("📊 Roadmap API response:", data);
+      console.log(" Roadmap API response:", data);
 
       if (data.status === 'success') {
         setStudyPlan(data.data);
-        console.log("✅ Fetched Study Plan:", data.data);
+        console.log(" Fetched Study Plan:", data.data);
         
         // Load task completions first, then convert study plan to daily tasks
         let completions = {};
@@ -321,7 +321,7 @@ const TrackerPage: React.FC = () => {
         console.error('Failed to fetch roadmap:', data.message);
       }
     } catch (error: any) {
-      console.error('❌ Error fetching roadmap:', error.message, error);
+      console.error(' Error fetching roadmap:', error.message, error);
       
       // Even if roadmap creation fails, create a basic study plan and save goals
       console.log('Creating fallback study plan due to roadmap creation error');
@@ -369,7 +369,7 @@ const TrackerPage: React.FC = () => {
     let currentCompleted = false;
     
     for (const date in dailyTasks) {
-      const task = dailyTasks[date].find(task => task.id === taskId);
+      const task = dailyTasks[date].find((task: { id: number; completed: boolean }) => task.id === taskId);
       if (task) {
         taskDate = date;
         currentCompleted = task.completed;
@@ -474,7 +474,7 @@ const TrackerPage: React.FC = () => {
               label="Duration (days)"
               type="number"
               value={duration}
-              onChange={(e) => setDuration(parseInt(e.target.value, 10))}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDuration(parseInt(e.target.value, 10))}
               variant="outlined"
               size="small"
               className="duration-field"
@@ -701,7 +701,7 @@ const TrackerPage: React.FC = () => {
               <Card className="stats-card" elevation={2} sx={{ mt: 3 }}>
                 <CardContent>
                   <Typography variant="h6" className="stats-title" gutterBottom>
-                    📊 Quick Stats
+                     Quick Stats
                   </Typography>
                   
                   <Box className="stat-item">
@@ -720,7 +720,7 @@ const TrackerPage: React.FC = () => {
                       Tasks Completed
                     </Typography>
                     <Typography variant="h4" className="stat-number">
-                      {Object.values(dailyTasks).flat().filter(task => task.completed).length}
+                      {Object.values(dailyTasks).flat().filter((task: any) => task.completed).length}
                     </Typography>
                   </Box>
                   

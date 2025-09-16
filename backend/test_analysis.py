@@ -6,7 +6,7 @@ sys.path.append('src')
 # Test the import and basic functionality
 try:
     from src.ai_modules.agents.career_gap_agent import run_gap_analysis
-    print("✅ Import successful!")
+    print(" Import successful!")
     
     # Test with sample data
     sample_resume = {
@@ -23,9 +23,9 @@ try:
         "technical_skills": ["Python", "JavaScript", "C++", "Data Structures"]
     }
     
-    print("🧪 Testing analysis...")
+    print(" Testing analysis...")
     result = run_gap_analysis(sample_resume, sample_job, user_id=1)
-    print("✅ Analysis completed!")
+    print(" Analysis completed!")
     print(f"Status: {result.get('status')}")
     print(f"Analysis keys: {list(result.get('analysis', {}).keys())}")
     
@@ -36,9 +36,9 @@ try:
         for skill in skills_to_improve[:2]:  # Show first 2
             print(f"  - {skill.get('name')}: {skill.get('current')}% → {skill.get('target')}%")
     else:
-        print(f"❌ Analysis failed: {result}")
+        print(f" Analysis failed: {result}")
         
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f" Error: {e}")
     import traceback
     traceback.print_exc()

@@ -386,7 +386,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         {/* File Upload Section */}
         <Paper className="upload-section" elevation={1}>
           <Typography variant="h6" gutterBottom>
-            📄 Upload Resume (PDF)
+             Upload Resume (PDF)
           </Typography>
           
           <input
@@ -435,7 +435,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         {/* Personal Information */}
         <Box className="form-section">
           <Typography variant="h6" className="section-title" gutterBottom>
-            👤 Personal Information
+             Personal Information
           </Typography>
           <Box display="flex" flexDirection="column" gap={2}>
             <Box display="flex" gap={2} flexDirection={{ xs: 'column', sm: 'row' }}>
@@ -486,7 +486,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         {/* Skills Section */}
         <Box className="form-section">
           <Typography variant="h6" className="section-title" gutterBottom>
-            🛠️ Skills
+             Skills
           </Typography>
           
           <Box display="flex" gap={1} mb={2}>
@@ -526,7 +526,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         <Box className="form-section">
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
             <Typography variant="h6" className="section-title">
-              💼 Work Experience
+               Work Experience
             </Typography>
             <Button
               variant="outlined"
@@ -598,7 +598,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         <Box className="form-section">
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
             <Typography variant="h6" className="section-title">
-              🎓 Education
+               Education
             </Typography>
             <Button
               variant="outlined"
@@ -670,7 +670,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         <Box className="form-section">
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
             <Typography variant="h6" className="section-title">
-              🚀 Projects
+               Projects
             </Typography>
             <Button
               variant="outlined"

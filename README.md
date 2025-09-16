@@ -230,6 +230,151 @@ The frontend will be available at `http://localhost:3000`
 - Frontend logs: Use browser developer tools console
 - Database logs: Check TiDB server logs
 
+## Deployment
+
+### Production Deployment on AWS App Runner
+
+This application is configured for deployment on AWS App Runner using Docker containers. The deployment combines the React frontend and Flask backend into a single container with Nginx as a reverse proxy.
+
+#### Prerequisites
+
+- AWS CLI installed and configured
+- Docker installed and running
+- AWS Account with permissions for ECR and App Runner
+- TiDB Cloud database instance
+- Groq API key
+
+#### Architecture
+
+The production deployment uses:
+- **Single Docker Container**: Multi-stage build combining frontend and backend
+- **Nginx**: Serves static React files and proxies API requests
+- **Flask Backend**: Runs internally on port 5001
+- **External Services**: TiDB Cloud database and Groq API
+
+#### Quick Deployment
+
+1. **Automated Deployment Script**:
+   ```bash
+   # For Linux/Mac
+   ./deploy-aws.sh
+   
+   # For Windows PowerShell
+   ./deploy-aws.ps1
+   ```
+
+2. **Manual Deployment Steps**:
+
+   **Step 1: Create ECR Repository**
+   ```bash
+   aws ecr create-repository --repository-name hackathon-tidb-app --region us-east-1
+   ```
+
+   **Step 2: Build and Push Docker Image**
+   ```bash
+   # Build the image
+   docker build -t hackathon-tidb-app:latest .
+   
+   # Get AWS account ID and create ECR URI
+   AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+   ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/hackathon-tidb-app"
+   
+   # Tag and push to ECR
+   docker tag hackathon-tidb-app:latest ${ECR_URI}:latest
+   aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_URI}
+   docker push ${ECR_URI}:latest
+   ```
+
+   **Step 3: Create App Runner Service**
+   1. Go to [AWS App Runner Console](https://console.aws.amazon.com/apprunner/)
+   2. Click "Create service"
+   3. Choose "Container registry" as source
+   4. Select your ECR repository
+   5. Configure service settings:
+      - **Service name**: `hackathon-tidb-app`
+      - **Virtual CPU**: 1 vCPU
+      - **Virtual memory**: 2 GB
+      - **Port**: 80
+
+#### Environment Variables
+
+Configure these environment variables in the App Runner console:
+
+**Required Variables:**
+```
+FLASK_ENV=production
+TIDB_HOST=your_tidb_host
+TIDB_PORT=4000
+TIDB_USER=your_tidb_user
+TIDB_PASSWORD=your_tidb_password
+TIDB_DATABASE=your_database_name
+GROQ_API_KEY=your_groq_api_key
+```
+
+**Optional Variables:**
+```
+TIDB_SSL_DISABLED=False
+TIDB_MAX_CONNECTIONS=10
+TIDB_CONNECT_TIMEOUT=10
+TIDB_READ_TIMEOUT=30
+TIDB_WRITE_TIMEOUT=30
+```
+
+#### Docker Configuration
+
+The application uses a multi-stage Docker build:
+
+1. **Frontend Stage**: Builds React application using Node.js
+2. **Backend Stage**: Prepares Python Flask application
+3. **Production Stage**: Combines both with Nginx reverse proxy
+
+Key features:
+- Optimized for production with minimal image size
+- Nginx serves static files and proxies API requests
+- Single container deployment for simplified management
+- Health checks and proper logging
+
+#### Monitoring and Maintenance
+
+- **Logs**: Available through AWS CloudWatch Logs
+- **Metrics**: Monitor through App Runner console
+- **Health Checks**: Automatic health monitoring included
+- **Scaling**: Auto-scaling based on traffic
+
+#### Troubleshooting Deployment
+
+**Common Issues:**
+
+1. **Build Failures**:
+   - Ensure Docker is running
+   - Check all dependencies are listed in requirements.txt
+   - Verify .dockerignore is properly configured
+
+2. **Runtime Errors**:
+   - Verify all environment variables are set
+   - Check CloudWatch logs for detailed errors
+   - Ensure database connection details are correct
+
+3. **API Connection Issues**:
+   - Verify Nginx configuration is correct
+   - Check backend is running on port 5001
+   - Test API endpoints directly
+
+**Debug Commands:**
+```bash
+# Test Docker build locally
+docker build -t test-app .
+docker run -p 80:80 test-app
+
+# Check container logs
+docker logs <container-id>
+
+# Test API endpoints
+curl http://localhost/api/health
+```
+
+For detailed deployment instructions, see `AWS_DEPLOYMENT_GUIDE.md`.
+
 ## Contributing
 
 1. Fork the repository
