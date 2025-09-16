@@ -271,6 +271,14 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  async deleteWorkplace(workplaceId: number) {
+    const response = await fetch(`${API_BASE_URL}/workplaces/${workplaceId}`, {
+      method: "DELETE",
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(response);
+  }
+
   // Health check
   async healthCheck() {
     const response = await fetch(`${API_BASE_URL}/health`);

@@ -250,3 +250,19 @@ class WorkplaceModel:
         except Exception as e:
             logger.error(f"Error updating workplace: {e}")
             return None
+    
+    @staticmethod
+    def delete_workplace(workplace_id: int) -> bool:
+        """Delete a workplace and all associated data"""
+        try:
+            with db_config.get_connection() as conn:
+                with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                    # Delete the workplace (cascade delete will handle related data)
+                    query = "DELETE FROM workplaces WHERE id = %s"
+                    cursor.execute(query, (workplace_id,))
+                    
+                    return cursor.rowcount > 0
+                    
+        except Exception as e:
+            logger.error(f"Error deleting workplace: {e}")
+            return False

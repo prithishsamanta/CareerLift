@@ -16,10 +16,16 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import {
   Add,
   FolderOpen,
+  MoreVert,
+  Delete,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Header from '../components/Header';
@@ -50,6 +56,10 @@ const HomePage: React.FC = () => {
   const [workspaceNameError, setWorkspaceNameError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Load workplaces from backend on component mount
   useEffect(() => {
@@ -190,6 +200,50 @@ const HomePage: React.FC = () => {
     loadWorkplaces();
   };
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, workspace: Workspace) => {
+    event.stopPropagation(); // Prevent card click
+    setAnchorEl(event.currentTarget);
+    setSelectedWorkspace(workspace);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedWorkspace(null);
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+    setAnchorEl(null); // Close menu but keep selectedWorkspace
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedWorkspace) return;
+
+    try {
+      setDeleting(true);
+      await apiService.deleteWorkplace(selectedWorkspace.id);
+      
+      // Remove the workspace from the local state
+      setWorkspaces(prev => prev.filter(w => w.id !== selectedWorkspace.id));
+      
+      // If the deleted workspace was the current workspace, clear it
+      setCurrentWorkspace(null);
+      
+      setDeleteDialogOpen(false);
+      setSelectedWorkspace(null);
+    } catch (error: any) {
+      console.error('Error deleting workspace:', error);
+      setError(error.message || 'Failed to delete workspace');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setSelectedWorkspace(null);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -305,12 +359,30 @@ const HomePage: React.FC = () => {
                     sx={{
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
+                      position: 'relative',
                       '&:hover': {
                         transform: 'translateY(-4px)',
                         boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
                       }
                     }}
                   >
+                    {/* 3-dots menu button */}
+                    <IconButton
+                      onClick={(e) => handleMenuOpen(e, workspace)}
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        zIndex: 1,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 1)',
+                        }
+                      }}
+                    >
+                      <MoreVert fontSize="small" />
+                    </IconButton>
+
                     <CardContent 
                       className="workspace-content"
                       sx={{ 
@@ -575,6 +647,68 @@ const HomePage: React.FC = () => {
             disabled={!newWorkspaceName.trim() || !!workspaceNameError}
           >
             Create Workspace
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 3-dots Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <MenuItem onClick={handleDeleteClick} sx={{ color: '#dc2626' }}>
+          <ListItemIcon>
+            <Delete fontSize="small" sx={{ color: '#dc2626' }} />
+          </ListItemIcon>
+          <ListItemText>Delete Workspace</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        className="create-workspace-dialog"
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle className="dialog-title">
+          Delete Workspace
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete "{selectedWorkspace?.name}"? This action cannot be undone and will permanently remove all associated data including analysis results, goals, and task completions.
+          </Typography>
+        </DialogContent>
+        <DialogActions className="dialog-actions">
+          <Button
+            onClick={handleDeleteCancel}
+            className="cancel-button"
+            disabled={deleting}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            sx={{
+              backgroundColor: '#dc2626',
+              '&:hover': {
+                backgroundColor: '#b91c1c',
+              }
+            }}
+            disabled={deleting}
+          >
+            {deleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

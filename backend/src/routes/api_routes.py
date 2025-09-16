@@ -1237,6 +1237,65 @@ def get_workplace(workplace_id):
             'message': f'Failed to get workplace: {str(e)}'
         }), 500
 
+@api_bp.route('/workplaces/<int:workplace_id>', methods=['DELETE'])
+def delete_workplace(workplace_id):
+    """
+    Delete a workplace and all associated data
+    """
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({
+                'status': 'error',
+                'message': 'Authorization token required'
+            }), 401
+        
+        session_token = auth_header.split(' ')[1]
+        user = UserModel.validate_session(session_token)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid or expired session'
+            }), 401
+        
+        # Get workplace to verify ownership
+        workplace = WorkplaceModel.get_workplace_by_id(workplace_id)
+        
+        if not workplace:
+            return jsonify({
+                'status': 'error',
+                'message': 'Workplace not found'
+            }), 404
+        
+        # Verify user owns this workplace
+        if workplace['user_id'] != user['id']:
+            return jsonify({
+                'status': 'error',
+                'message': 'Access denied'
+            }), 403
+        
+        # Delete the workplace (this will cascade delete related data)
+        success = WorkplaceModel.delete_workplace(workplace_id)
+        
+        if not success:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to delete workplace'
+            }), 500
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Workplace deleted successfully'
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Delete workplace error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to delete workplace: {str(e)}'
+        }), 500
+
 @api_bp.route("/ai/skill-gap", methods=["POST"])
 def skill_gap_analysis():
     data = request.json
