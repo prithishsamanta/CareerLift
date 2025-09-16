@@ -2,6 +2,8 @@
 
 A comprehensive web application that helps users analyze their career gaps, create personalized learning roadmaps, and track their progress towards professional goals.
 
+Functioning Link: https://w3qk3yvwxp.us-east-1.awsapprunner.com/
+
 ## Overview
 
 This platform combines resume analysis, job description parsing, and AI-powered insights to provide users with actionable career development recommendations. Users can create workspaces, upload their resumes and job descriptions, receive detailed gap analysis, and follow structured learning plans.
